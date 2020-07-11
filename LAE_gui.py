@@ -1,8 +1,10 @@
+import matplotlib
+matplotlib.use('TkAgg')
 import tkinter as tk
 import matplotlib.pyplot as plt
 import numpy as np
 import warnings
-
+    
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 
@@ -31,7 +33,7 @@ class Application(tk.Frame):
         self.button1 = tk.Button(root, text='      --Select Cube--      ',command=self.get_cube,font=('Arial', 15, 'bold'),state='disabled') 
         self.button2 = tk.Button(root, text='     --Select Catalog--     ', command=self.get_cat, font=('Arial', 15, 'bold'),state='disabled')
         self.button3 = tk.Button(root, text='   --Start Classifying--   ', command=self.start_class, font=('Arial', 15, 'bold'),state='disabled')
-        self.button4 = tk.Button(root, text='    --Exit Application--    ', command=root.destroy, font=('Arial', 15, 'bold'))
+        self.button4 = tk.Button(root, text='    --Exit Application--    ', command=root.quit, font=('Arial', 15, 'bold'))
 
         canvas1.create_window(100, 50, window=self.button0)
         canvas1.create_window(300, 50, window=self.button1)
