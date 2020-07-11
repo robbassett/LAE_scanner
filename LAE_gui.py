@@ -81,10 +81,14 @@ class Application(tk.Frame):
         self.plot.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
 
     def enter_ID(self):
-        self.il = tk.simpledialog.askstring('Who Are You?','Classifier ID')
+        self.il = tk.simpledialog.askstring('Who Are You?','Enter Classifier ID, No Spaces')
         self.idlab.config(text=' '*250)
         self.idlab.config(text=f'CLASSIFIER NAME: {self.il}')
-        self.button1['state'] = 'normal'
+        if len(self.il.split()) > 1:
+            tk.messagebox.showinfo('!!!','No Spaces in Classifier Name')
+            self.idlab.config(text='CLASSIFIER NAME: None')
+        else:
+            self.button1['state'] = 'normal'
         
     def get_cube(self):
         self.cube_name = tk.filedialog.askopenfilename(filetypes=[('FITS files','*.fits')])
@@ -103,15 +107,22 @@ class Application(tk.Frame):
     def get_next_good(self):
         fl= 0
         while fl == 0:
-            idt = str(self.catalog[self.index,0])
-            crds= [float(self.catalog[self.index,2]),float(self.catalog[self.index,3]),float(self.catalog[self.index,4])]
-            self.data_cube.Check_Edge(crds)
+            if self.index < self.catalog.shape[0]:
+                idt = str(self.catalog[self.index,0])
+                crds= [float(self.catalog[self.index,2]),float(self.catalog[self.index,3]),float(self.catalog[self.index,4])]
+                self.data_cube.Check_Edge(crds)
             
-            if self.data_cube.good:
-                fl=1
-            else:
-                self.index+=1
+                if self.data_cube.good:
+                    fl=1
+                else:
+                    self.index+=1
 
+            else:
+                tk.messagebox.showinfo('!!!',f'You classified them all, congratulations!')
+                self.save_output()
+                root.quit()
+
+                    
         self.good_indices.append(self.index)
         
     def update_plot(self):
@@ -154,7 +165,8 @@ class Application(tk.Frame):
         ca = self.cal.split('.')[0]
         
         cat_print = open(self.cat_name,'r')
-        out_print = open(f'{cu}_{ca}_{self.il}_class.dat','w')
+        out_file_name = tk.simpledialog.askstring('Save Classifications','Enter File Name:                                                     ',initialvalue=f'{cu}_{ca}_{self.il}_class.dat')
+        out_print = open(out_file_name,'w')
         out_print.write('# MAGPI LAE SCANNER OUTPUTS:\n')
         out_print.write(f'# Input cube = {self.cul}\n')
         out_print.write(f'# Input catalog = {self.cal}\n')
@@ -165,13 +177,32 @@ class Application(tk.Frame):
                 out_print.write(line)
         out_print.write('#	 8: LAE?\n')
         out_print.write('#   9: Confidence\n')
-        line = cat_print.readline()
+        lines = cat_print.readlines()
         
         for k in self.output.keys():
-            while line.split()[0] != k: line=cat_print.readline()
-            out_print.write(line[:-1]+f'   {self.output[k][0]}   {self.output[k][1]}\n')
-        
+            out_print.write(lines[int(k)][:-1]+f'   {self.output[k][0]}   {self.output[k][1]}\n')
 
+        out_print.close()
+        tk.messagebox.showinfo('!!!',f'Output saved as {out_file_name}')
+        self.make_quit_dialog()
+        
+    def make_quit_dialog(self):
+        quit_dialog = tk.Tk()
+        quit_dialog.title('Leaving so soon?')
+        canvas2 = tk.Canvas(quit_dialog,width=400,height=50)
+        canvas2.pack()
+
+        qlab = tk.Label(quit_dialog,text='Quit or dont quit, that is the question')
+        qlab.config(font=('Comic Sans',15, 'bold'))
+        canvas2.create_window(200,10,window=qlab)
+
+        but1 = tk.Button(quit_dialog, text='   --Quit--    ',command=root.quit,font=('Arial',15,'bold'))
+        but2 = tk.Button(quit_dialog, text=' --Dont Quit-- ',command=quit_dialog.destroy,font=('Arial',15,'bold'))
+
+        canvas2.create_window(100,30,window=but1)
+        canvas2.create_window(300,30,window=but2)
+            
 root=tk.Tk()
+root.title('MAGPI LAE SCANNER beta')
 app=Application(master=root)
 app.mainloop()

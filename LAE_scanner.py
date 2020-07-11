@@ -2,28 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import astropy.io.fits as pf
-from scipy.signal import savgol_filter as svgf
-
-# NO MF
-# ---- ---- ---- ---- ---- ! -#
-#- ! - Interesting things  -- #
-#  419
-#  439
-#  1156
-#  1459
-#  1616 (dubious)
-#  2110 (dubious)
-#  3250 (dubious)
-#  3706
-#  4120
-#  6336
-#- ! ---- ---- ---- ---- ---- #
-
-# MF
-# ---- ---- ---- ---- ---- ! -#
-#- ! - Interesting things  -- #
-#  
-#- ! ---- ---- ---- ---- ---- #
+import bottleneck as bn
 
 class MAGPI_LAE_Check(object):
 
@@ -32,11 +11,11 @@ class MAGPI_LAE_Check(object):
         
         dc = pf.open(file_in)
         self.data  = dc[1].data
-        self.noise = np.sqrt(dc[2].data)
+        self.noise = dc[2].data
         self.head  = dc[1].header
 
-        mnoi = np.nanmean(self.noise,axis=1)
-        self.mean_noise = np.nanmean(mnoi,axis=1)
+        mnoi = bn.nanmean(self.noise,axis=1)
+        self.mean_noise = bn.nanmean(mnoi,axis=1)
 
         dc = 0.
 
@@ -62,7 +41,7 @@ class MAGPI_LAE_Check(object):
 
             if len(tch) == 0:
                 self.good=False
-        
+
     def Single_Plot(self,coords,idt,box_size=20,spec_size=50):
 
         self.current_coords = coords
@@ -76,10 +55,10 @@ class MAGPI_LAE_Check(object):
         imc = np.linspace(int(coords[1]-box_size),int(coords[1]+box_size),int((2.*box_size)+1.),dtype=int)
         imz = np.where(np.abs(self.wav_ind-coords[2]) <= 3.)[0]
         subz= np.where((coords[2]-self.wav_ind-4. < 30)|(self.wav_ind-4-coords[2] < 30))[0]
-        subv= self.data[subz,:,:]
-        subv= subv[:,imc,:]
+        subtot= self.data[subz,:,:]
+        subv= subtot[:,imc,:]
         subv= subv[:,:,imr]
-        subv= np.nanmean(subv,axis=0)
+        subv= bn.nanmean(subv,axis=0)
 
         self.current_spec = np.sum(self.data[:,tr,tc],axis=1)
         self.current_img  = self.data[imz,:,:]
@@ -87,8 +66,7 @@ class MAGPI_LAE_Check(object):
         self.current_img  = self.current_img[:,:,imr]
         self.current_img  = np.sum(self.current_img-subv,axis=0)
 
-        subtot = self.data[subz,:,:]
-        subtot = np.nanmean(subtot,axis=0)
+        subtot = bn.nanmean(subtot,axis=0)
         self.tot_img = self.data[imz,:,:]
         self.tot_img = np.sum(self.tot_img-subtot,axis=0)
 
@@ -97,8 +75,7 @@ class MAGPI_LAE_Check(object):
         
         F  = plt.figure(figsize=(14,5))
         ax = F.add_subplot(121)
-        ax.plot(self.wav[tz],svgf(self.current_spec[tz],5,2),'k-')
-        ax.plot(self.wav[tzc],self.current_spec[tzc],'g--')
+        ax.plot(self.wav[tz],self.current_spec[tz],'k-')
         ax.set_title(f'Object #{int(float(idt))}')
         ax.set_ylabel('Signal')
         xa = ax.twinx()
@@ -115,15 +92,17 @@ class MAGPI_LAE_Check(object):
 if __name__ == '__main__':
 
     last_obj = -1
-    cat    = np.loadtxt('./culled.cat',float)
+    cat    = np.loadtxt('../GAMAJ223757/catalog.cat',float)
     objs   = [133,1105,2207,3071,3940,5252,6121,8476]
-    tm_obj = MAGPI_LAE_Check('GAMAJ223757_ZAP.fits')
+    tm_obj = MAGPI_LAE_Check('../GAMAJ223757/GAMAJ223757_ZAP.fits')
 
-    for i in range(len(cat[:,0])):
-    
+    #for i in range(len(cat[:,0])):
+    for i in range(2):
         if int(cat[i,0]) > last_obj:
             
             idt = str(cat[i,0])
             crds= [float(cat[i,2]),float(cat[i,3]),float(cat[i,4])]
             tm_obj.Check_Edge(crds)
-            tm_obj.Single_Plot(crds,idt)
+            fig = tm_obj.Single_Plot(crds,idt)
+            plt.show()
+        
