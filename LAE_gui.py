@@ -81,14 +81,16 @@ class Application(tk.Frame):
         self.plot.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
 
     def enter_ID(self):
+        self.button1['state'] = 'normal'
         self.il = tk.simpledialog.askstring('Who Are You?','Enter Classifier ID, No Spaces')
         self.idlab.config(text=' '*250)
         self.idlab.config(text=f'CLASSIFIER NAME: {self.il}')
         if len(self.il.split()) > 1:
             tk.messagebox.showinfo('!!!','No Spaces in Classifier Name')
             self.idlab.config(text='CLASSIFIER NAME: None')
+            self.button1['state'] = 'disabled'
         else:
-            self.button1['state'] = 'normal'
+            pass
         
     def get_cube(self):
         self.cube_name = tk.filedialog.askopenfilename(filetypes=[('FITS files','*.fits')])
