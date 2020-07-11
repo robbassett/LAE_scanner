@@ -5,7 +5,7 @@ import matplotlib.patheffects as path_effects
 def make_fig():	
     fig = plt.figure(figsize=(14,5))
     ax  = fig.add_subplot(111)
-    bim = plt.imread(f'./images/back{np.random.randint(1,7)}.png')
+    bim = plt.imread(f'./images/back{np.random.randint(1,10)}.png')
     ax.imshow(bim,extent=[1,99,-1.1,1.1],aspect='auto')
     
     ax.set_xticks([])
@@ -71,17 +71,20 @@ def make_fig():
         ax.plot(xc+np.random.normal(scale=.08*i),yc+np.random.normal(scale=.005*i),'o',alpha=.15,ms=szs[i],mfc='None',mew=5,mec=np.random.choice(cfam))
 
     tlucha =  plt.imread(f'./images/lucha{np.random.randint(1,9)}.png')
-    ax.imshow(tlucha,extent=[58,95,-1.5,1.],aspect='auto',zorder=1000)
+    ax.imshow(tlucha,extent=[55,92,-1.5,1.],aspect='auto',zorder=1000)
     tLAE   = plt.imread(f'./images/LAE{np.random.randint(1,11)}.png')
     ax.imshow(tLAE,extent=[xc-10,xc+10,yc-.35,yc+.35],aspect='auto',zorder=1001)
     
     ax.axhline(y=-.8,linestyle='-',linewidth=20,color=tmc1,zorder=1002)
-    ax.axhline(y=-.8,linestyle='-',linewidth=15,color=tmc2,zorder=1003)
-    ax.axhline(y=-.9,linestyle='-',linewidth=10,color=tmc1,zorder=1004)
-    ax.axhline(y=-1.05,linestyle='-',linewidth=5,color=tmc2,zorder=1005)
-    an=ax.annotate(line1,xy=(2,-1.),color='k',fontsize=18,zorder=1006)
+    ax.axvline(x=95,linestyle='-',linewidth=25,color=tmc2,zorder=1003)
+    ax.axhline(y=-.8,linestyle='-',linewidth=15,color=tmc2,zorder=1004)
+    ax.axvline(x=94.5,linestyle='-',linewidth=5,color=tmc1,zorder=1005)
+    ax.axvline(x=98,linestyle='-',linewidth=5,color=tmc1,zorder=1006)
+    ax.axhline(y=-.9,linestyle='-',linewidth=10,color=tmc1,zorder=1007)
+    ax.axhline(y=-1.05,linestyle='-',linewidth=5,color=tmc2,zorder=1008)
+    an=ax.annotate(line1,xy=(2,-1.),color='k',fontsize=18,zorder=1009)
     an.set_path_effects([path_effects.Stroke(linewidth=12,foreground=tmc1),path_effects.Normal()])
-    an=ax.annotate(line1,xy=(2,-1.),color=tmc2,fontsize=18,zorder=1007)
+    an=ax.annotate(line1,xy=(2,-1.),color=tmc2,fontsize=18,zorder=1010)
     an.set_path_effects([path_effects.Stroke(linewidth=5,foreground='w'),path_effects.Normal()])
 
     return fig
