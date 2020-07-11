@@ -1,12 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.font_manager import FontProperties
 import matplotlib.patheffects as path_effects
-
 
 def make_fig():	
     fig = plt.figure(figsize=(14,5))
     ax  = fig.add_subplot(111)
+    bim = plt.imread(f'./images/back{np.random.randint(1,7)}.png')
+    ax.imshow(bim,extent=[1,99,-1.1,1.1],aspect='auto')
+    
     ax.set_xticks([])
     ax.set_yticks([])
     xx = np.arange(0,100,.01)
@@ -39,9 +40,48 @@ def make_fig():
 
     line1 = f'Are you {np.random.choice(words1)} enough to {np.random.choice(words2)} the {np.random.choice(words3)} LAEs?'
 
-    font = FontProperties()
-    font.set_name(np.random.choice(fonts))
-    an=ax.annotate(line1,xy=(2,-1.),color=np.random.choice(cl[np.random.randint(0,7)]),fontsize=23)
-    an.set_path_effects([path_effects.Stroke(linewidth=8,foreground='w'),path_effects.Normal()])
+    tmc1 = np.random.choice(cl[np.random.randint(0,7)])
+    tmc2 = np.random.choice(cl[np.random.randint(0,7)])
+    cfam = cl[np.random.randint(0,7)]
+
+    nlines=250
+    int0 = np.random.uniform(15,45)
+    for i in range(nlines):
+        intercept = np.random.normal(loc=int0,scale=2)
+        slope     = np.random.normal(loc=0.05,scale=0.01)
+        ax.plot(xx,slope*(xx-intercept),'-',c=np.random.choice(cfam),lw=.25,alpha=.4)
+
+    cfam = cl[np.random.randint(0,7)]
+    int1 = np.random.uniform(15,45)
+    for i in range(nlines):
+        intercept = np.random.normal(loc=int1,scale=2)
+        slope     = np.random.normal(loc=-0.07,scale=0.007)
+        ax.plot(xx,slope*(xx-intercept),'-',c=np.random.choice(cfam),lw=.25,alpha=.4)
+
+    cfam = cl[np.random.randint(0,7)]
+    xc = ((0.05*int0)+(0.07*int1))/(0.05+0.07)
+    yc = 0.05*(xc-int0)
+    nc = np.random.randint(150,250)
+    szs= np.linspace(15,60,nc)
+    fl = 0
+    for i in range(nc):
+        if i/len(szs) > 0.5 and fl == 0:
+            cfam = cl[np.random.randint(0,7)]
+            fl = 1
+        ax.plot(xc+np.random.normal(scale=.08*i),yc+np.random.normal(scale=.005*i),'o',alpha=.15,ms=szs[i],mfc='None',mew=5,mec=np.random.choice(cfam))
+
+    tlucha =  plt.imread(f'./images/lucha{np.random.randint(1,9)}.png')
+    ax.imshow(tlucha,extent=[58,95,-1.5,1.],aspect='auto',zorder=1000)
+    tLAE   = plt.imread(f'./images/LAE{np.random.randint(1,11)}.png')
+    ax.imshow(tLAE,extent=[xc-10,xc+10,yc-.35,yc+.35],aspect='auto',zorder=1001)
+    
+    ax.axhline(y=-.8,linestyle='-',linewidth=20,color=tmc1,zorder=1002)
+    ax.axhline(y=-.8,linestyle='-',linewidth=15,color=tmc2,zorder=1003)
+    ax.axhline(y=-.9,linestyle='-',linewidth=10,color=tmc1,zorder=1004)
+    ax.axhline(y=-1.05,linestyle='-',linewidth=5,color=tmc2,zorder=1005)
+    an=ax.annotate(line1,xy=(2,-1.),color='k',fontsize=18,zorder=1006)
+    an.set_path_effects([path_effects.Stroke(linewidth=12,foreground=tmc1),path_effects.Normal()])
+    an=ax.annotate(line1,xy=(2,-1.),color=tmc2,fontsize=18,zorder=1007)
+    an.set_path_effects([path_effects.Stroke(linewidth=5,foreground='w'),path_effects.Normal()])
 
     return fig
