@@ -68,7 +68,12 @@ def make_fig():
         if i/len(szs) > 0.5 and fl == 0:
             cfam = cl[np.random.randint(0,7)]
             fl = 1
-        ax.plot(xc+np.random.normal(scale=.08*i),yc+np.random.normal(scale=.005*i),'o',alpha=.15,ms=szs[i],mfc='None',mew=5,mec=np.random.choice(cfam))
+
+        fld = np.random.uniform(0,1)
+        if fld >= 0.75:
+            ax.plot(xc+np.random.normal(scale=.08*i),yc+np.random.normal(scale=.005*i),'o',alpha=.15,ms=szs[i],mfc='None',mew=5,mec=np.random.choice(cfam))
+        else:
+            ax.plot(xc+np.random.normal(scale=.08*i),yc+np.random.normal(scale=.005*i),'o',alpha=.22,ms=szs[i],mec='None',mew=5,mfc=np.random.choice(cfam))
 
     tlucha =  plt.imread(f'./images/lucha{np.random.randint(1,9)}.png')
     ax.imshow(tlucha,extent=[55,92,-1.5,1.],aspect='auto',zorder=1000)
