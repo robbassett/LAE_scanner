@@ -5,6 +5,7 @@ LAE_scanner is the ultimate tool for identifying those pesky emission line only 
 # "Installation"
 
 To get started (assuming you have git) simply move to the folder where you want LAE_scanner to live and enter this command into the terminal:
+
 git clone https://github.com/robbassett/LAE_scanner.git
 
 Congratulations, LAE_scanner is "installed"!
