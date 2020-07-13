@@ -9,7 +9,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 
 import LAE_scanner as LAEs
-from fig_init import make_fig
+from fig_init import *
 
 #warnings.filterwarnings("ignore")
 
@@ -121,8 +121,15 @@ class MAGPI_LAE_Scanner(tk.Frame):
                     self.index+=1
 
             else:
-                tk.messagebox.showinfo('CONGRATULATIONS!',f'You classified them all, you are the messiah of Earth!')
+                tk.messagebox.showinfo('CONGRATULATIONS!',f'You classified them all!')
+                
+                znc = np.random.randint(0,101)
+                #znc = 1
+                if znc == 1:
+                    make_zanac()
+
                 self.save_output()
+                
                 fl = 2
 
         if fl == 2:
