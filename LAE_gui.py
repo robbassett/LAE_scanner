@@ -1,5 +1,5 @@
 import matplotlib
-matplotlib.use('TkAgg')
+matplotlib.use('Agg')
 import tkinter as tk
 import matplotlib.pyplot as plt
 import numpy as np
@@ -11,11 +11,12 @@ from matplotlib.figure import Figure
 import LAE_scanner as LAEs
 from fig_init import make_fig
 
-warnings.filterwarnings("ignore")
+#warnings.filterwarnings("ignore")
 
-class Application(tk.Frame):
+class MAGPI_LAE_Scanner(tk.Frame):
     def __init__(self,master=None):
         tk.Frame.__init__(self,master)
+        self.saved  = False
         self.output = {}
         self.index=0
         self.good_indices=[]
@@ -33,7 +34,7 @@ class Application(tk.Frame):
         self.button1 = tk.Button(root, text='      --Select Cube--      ',command=self.get_cube,font=('Arial', 15, 'bold'),state='disabled') 
         self.button2 = tk.Button(root, text='     --Select Catalog--     ', command=self.get_cat, font=('Arial', 15, 'bold'),state='disabled')
         self.button3 = tk.Button(root, text='   --Start Classifying--   ', command=self.start_class, font=('Arial', 15, 'bold'),state='disabled')
-        self.button4 = tk.Button(root, text='    --Exit Application--    ', command=root.quit, font=('Arial', 15, 'bold'))
+        self.button4 = tk.Button(root, text='    --Exit Application--    ', command=self.make_quit_dialog, font=('Arial', 15, 'bold'))
 
         canvas1.create_window(100, 50, window=self.button0)
         canvas1.create_window(300, 50, window=self.button1)
@@ -56,11 +57,11 @@ class Application(tk.Frame):
         self.backbutt = tk.Button(root,text='      Back      ',command=self.last_LAE,font=('Arial',15,'bold'),state='disabled')
         self.savebutt = tk.Button(root,text='      Save      ',command=self.save_output,font=('Arial',15,'bold'),state='disabled')
 
-        LAElab = tk.Label(root,text='Is it an LAE?')
+        LAElab = tk.Label(root,text='Is it a galaxy?')
         LAElab.config(font=('Comic Sans',15,'bold'))
         self.LAEdec = tk.StringVar(root)
-        self.LAEdec.set('No')
-        LAEsel = tk.OptionMenu(root,self.LAEdec,'No','Yes')
+        self.LAEdec.set('Y')
+        LAEsel = tk.OptionMenu(root,self.LAEdec,'Y','N')
 
         CONlab = tk.Label(root,text='Confidence?')
         CONlab.config(font=('Comic Sans',15,'bold'))
@@ -76,8 +77,8 @@ class Application(tk.Frame):
         canvas1.create_window(680,150,window=self.backbutt)
         canvas1.create_window(780,150,window=self.savebutt)
 
-        fig = make_fig()
-        self.plot=FigureCanvasTkAgg(fig,master=root)
+        self.fig = make_fig()
+        self.plot=FigureCanvasTkAgg(self.fig,master=root)
         self.plot.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
 
     def enter_ID(self):
@@ -120,21 +121,25 @@ class Application(tk.Frame):
                     self.index+=1
 
             else:
-                tk.messagebox.showinfo('!!!',f'You classified them all, congratulations!')
+                tk.messagebox.showinfo('CONGRATULATIONS!',f'You classified them all, you are the messiah of Earth!')
                 self.save_output()
-                root.quit()
+                fl = 2
 
-                    
+        if fl == 2:
+            root.quit()
         self.good_indices.append(self.index)
         
     def update_plot(self):
         
         idt = str(self.catalog[self.index,0])
+        IDt = str(self.catalog[self.index,1])
         crds= [float(self.catalog[self.index,2]),float(self.catalog[self.index,3]),float(self.catalog[self.index,4])]
+
         
-        figure1 = self.data_cube.Single_Plot(crds,idt)
         self.plot.get_tk_widget().pack_forget()
-        self.plot = FigureCanvasTkAgg(figure1, root) 
+        plt.close(self.fig)
+        self.fig = self.data_cube.Single_Plot(crds,idt,IDt)
+        self.plot = FigureCanvasTkAgg(self.fig, root) 
         self.plot.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
     
     def start_class(self):
@@ -163,6 +168,7 @@ class Application(tk.Frame):
         self.update_plot()
 
     def save_output(self):
+        self.saved = True
         cu = self.cul.split('.')[0]
         ca = self.cal.split('.')[0]
         
@@ -178,7 +184,7 @@ class Application(tk.Frame):
                 line = cat_print.readline()
                 out_print.write(line)
         out_print.write('#	 8: LAE?\n')
-        out_print.write('#   9: Confidence\n')
+        out_print.write('#        9: Confidence\n')
         lines = cat_print.readlines()
         
         for k in self.output.keys():
@@ -189,6 +195,9 @@ class Application(tk.Frame):
         self.make_quit_dialog()
         
     def make_quit_dialog(self):
+        if not self.saved:
+            tk.messagebox.showinfo('!!!',f'Classifications not saved!')
+        
         quit_dialog = tk.Tk()
         quit_dialog.title('Leaving so soon?')
         canvas2 = tk.Canvas(quit_dialog,width=400,height=50)
@@ -203,8 +212,11 @@ class Application(tk.Frame):
 
         canvas2.create_window(100,30,window=but1)
         canvas2.create_window(300,30,window=but2)
-            
-root=tk.Tk()
-root.title('MAGPI LAE SCANNER beta')
-app=Application(master=root)
-app.mainloop()
+
+
+if __name__ == '__main__':
+    
+    root=tk.Tk()
+    root.title('MAGPI LAE SCANNER beta')
+    app=MAGPI_LAE_Scanner(master=root)
+    app.mainloop()
