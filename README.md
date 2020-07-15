@@ -10,6 +10,8 @@ git clone https://github.com/robbassett/LAE_scanner.git
 
 Congratulations, LAE_scanner is "installed"!
 
+(Note: LAE_scanner was written on OSX Catalina with python 3.8.3, if you are having difficulties perhaps try creating a clean python 3.8 environment with Anaconda)
+
 # Dependencies
 The following python packages are required to run LAE_scanner:
 
