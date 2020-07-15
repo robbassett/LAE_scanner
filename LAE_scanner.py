@@ -46,6 +46,7 @@ class MAGPI_LAE_Check(object):
 
             if len(tch) == 0:
                 self.good=False
+                break
 
     def Single_Plot(self,coords,idt,IDt,box_size=20,spec_size=50):
 
@@ -76,7 +77,6 @@ class MAGPI_LAE_Check(object):
         self.tot_img = np.sum(self.tot_img-subtot,axis=0)
 
         tzc = np.where(np.abs(self.wav_ind-coords[2]) <= 6.)[0]
-        
         
         F  = plt.figure(figsize=(14,5))
 

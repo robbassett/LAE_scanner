@@ -1,12 +1,16 @@
 import matplotlib
 matplotlib.use('Agg')
-import tkinter as tk
 import matplotlib.pyplot as plt
-import numpy as np
-import warnings
-    
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
+
+import tkinter as tk
+import tkinter.messagebox
+import tkinter.simpledialog
+import tkinter.filedialog
+
+import numpy as np
+import warnings
 
 import LAE_scanner as LAEs
 from fig_init import *
@@ -207,7 +211,7 @@ class MAGPI_LAE_Scanner(tk.Frame):
         
         quit_dialog = tk.Tk()
         quit_dialog.title('Leaving so soon?')
-        canvas2 = tk.Canvas(quit_dialog,width=400,height=50)
+        canvas2 = tk.Canvas(quit_dialog,width=400,height=60)
         canvas2.pack()
 
         qlab = tk.Label(quit_dialog,text='Quit or dont quit, that is the question')
@@ -217,8 +221,8 @@ class MAGPI_LAE_Scanner(tk.Frame):
         but1 = tk.Button(quit_dialog, text='   --Quit--    ',command=root.quit,font=('Arial',15,'bold'))
         but2 = tk.Button(quit_dialog, text=' --Dont Quit-- ',command=quit_dialog.destroy,font=('Arial',15,'bold'))
 
-        canvas2.create_window(100,30,window=but1)
-        canvas2.create_window(300,30,window=but2)
+        canvas2.create_window(100,40,window=but1)
+        canvas2.create_window(300,40,window=but2)
 
 
 if __name__ == '__main__':
