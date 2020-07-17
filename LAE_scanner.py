@@ -4,6 +4,7 @@ import matplotlib.cm as cm
 import astropy.io.fits as pf
 import bottleneck as bn
 
+# OH HEY THIS IS THE BUG BRANCH!
 
 # This class reads in the MAGPI datacube and creates
 # an object capable of displaying the aperture spectrum
