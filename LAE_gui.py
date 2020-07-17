@@ -148,13 +148,13 @@ class MAGPI_LAE_Scanner(tk.Frame):
 
         if fl == 2:
             root.quit()
-        self.good_indices.append(self.index)
+        self.good_indices.append(tind)
         self.current_coords = ncrds
         
     def update_plot(self):
-        
-        idt = str(self.catalog[self.index,0])
-        IDt = str(self.catalog[self.index,1])
+        tind = self.dorder[self.index]
+        idt = str(self.catalog[tind,0])
+        IDt = str(self.catalog[tind,1])
         
         self.plot.get_tk_widget().pack_forget()
         plt.close('all')
@@ -182,7 +182,8 @@ class MAGPI_LAE_Scanner(tk.Frame):
         self.update_plot()
 
     def next_LAE(self):
-        self.output[str(self.index)] = [self.LAEdec.get(),self.CONdec.get()]
+        tind = self.dorder[self.index]
+        self.output[str(tind)] = [self.LAEdec.get(),self.CONdec.get()]
         self.index+=1
         self.get_next_good()
         self.update_plot()
