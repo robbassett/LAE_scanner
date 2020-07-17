@@ -13,6 +13,7 @@ import numpy as np
 import warnings
 
 import LAE_scanner as LAEs
+from Cube_clipper import MiniCubes as MC
 from fig_init import *
 
 #warnings.filterwarnings("ignore")
@@ -115,9 +116,18 @@ class MAGPI_LAE_Scanner(tk.Frame):
         fl= 0
         while fl == 0:
             if self.index < self.catalog.shape[0]:
-                idt = str(self.catalog[self.index,0])
-                crds= [float(self.catalog[self.index,2]),float(self.catalog[self.index,3]),float(self.catalog[self.index,4])]
-                self.data_cube.Check_Edge(crds)
+                tind = self.dorder[self.index]
+                idt = str(self.catalog[tind,0])
+                crds= [float(self.catalog[tind,2]),float(self.catalog[tind,3]),float(self.catalog[tind,4])]
+
+                # Check if object still in current minicube:
+                minz= np.where(np.abs(self.zcents-crds[2]) == np.min(np.abs(self.zcents-crds[2])))[0]
+                if minz != self.cube_num:
+                    self.cube_num = minz[0]
+                    self.data_cube = LAEs.MAGPI_LAE_Check(f'./tmp_cubes/cube_{self.cube_num}.fits')
+
+                ncrds = [crds[0],crds[1],crds[2]-self.zstrt[self.cube_num]]
+                self.data_cube.Check_Edge(ncrds)
             
                 if self.data_cube.good:
                     fl=1
@@ -129,7 +139,7 @@ class MAGPI_LAE_Scanner(tk.Frame):
                 
                 znc = np.random.randint(0,101)
                 #znc = 1
-                if znc == 1:
+                if znc == 1000:
                     make_zanac()
 
                 self.save_output()
@@ -139,17 +149,16 @@ class MAGPI_LAE_Scanner(tk.Frame):
         if fl == 2:
             root.quit()
         self.good_indices.append(self.index)
+        self.current_coords = ncrds
         
     def update_plot(self):
         
         idt = str(self.catalog[self.index,0])
         IDt = str(self.catalog[self.index,1])
-        crds= [float(self.catalog[self.index,2]),float(self.catalog[self.index,3]),float(self.catalog[self.index,4])]
-
         
         self.plot.get_tk_widget().pack_forget()
-        plt.close(self.fig)
-        self.fig = self.data_cube.Single_Plot(crds,idt,IDt)
+        plt.close('all')
+        self.fig = self.data_cube.Single_Plot(self.current_coords,idt,IDt)
         self.plot = FigureCanvasTkAgg(self.fig, root) 
         self.plot.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
     
@@ -161,8 +170,13 @@ class MAGPI_LAE_Scanner(tk.Frame):
         self.backbutt['state'] = 'normal'
         self.savebutt['state'] = 'normal'
 
-        self.data_cube = LAEs.MAGPI_LAE_Check(self.cube_name)
+        # CLIP CUBE:
+        self.zcents,self.zstrt = MC(self.cat_name,self.cube_name)
+        
+        self.cube_num = 0
+        self.data_cube = LAEs.MAGPI_LAE_Check(f'./tmp_cubes/cube_{self.cube_num}.fits')
         self.catalog   = np.loadtxt(self.cat_name)
+        self.dorder = np.argsort(self.catalog[:,4])
         
         self.get_next_good()
         self.update_plot()

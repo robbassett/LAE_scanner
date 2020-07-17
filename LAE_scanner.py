@@ -4,8 +4,6 @@ import matplotlib.cm as cm
 import astropy.io.fits as pf
 import bottleneck as bn
 
-# OH HEY THIS IS THE BUG BRANCH!
-
 # This class reads in the MAGPI datacube and creates
 # an object capable of displaying the aperture spectrum
 # and narrow-band image of each candidate
@@ -16,9 +14,9 @@ class MAGPI_LAE_Check(object):
         self.sum_rad=sum_rad
         
         dc = pf.open(file_in)
-        self.data  = dc[1].data
-        self.noise = dc[2].data
-        self.head  = dc[1].header
+        self.data  = dc[0].data
+        self.noise = dc[1].data
+        self.head  = dc[0].header
 
         mnoi = bn.nanmean(self.noise,axis=1)
         self.mean_noise = bn.nanmean(mnoi,axis=1)
@@ -108,33 +106,4 @@ class MAGPI_LAE_Check(object):
         
         plt.tight_layout()
         return F
-        
-
-if __name__ == '__main__':
-
-    last_obj = -1
-    cat    = np.loadtxt('../GAMAJ223757/catalog.cat',float)
-    objs   = [133,1105,2207,3071,3940,5252,6121,8476]
-    tm_obj = MAGPI_LAE_Check('../GAMAJ223757/GAMAJ223757_ZAP.fits')
-
-    #for i in range(len(cat[:,0])):
-    ind=0
-    for i in range(2):
-        if int(cat[i,0]) > last_obj:
-
-            fl = 0
-            while fl == 0:
-                idt = str(cat[ind,0])
-                IDt = str(cat[ind,1])
-                crds= [float(cat[ind,2]),float(cat[ind,3]),float(cat[ind,4])]
-                tm_obj.Check_Edge(crds)
-                if tm_obj.good:
-                    fl = 1
-                    ind+=1
-                else:
-                    ind+=1
-                    pass
-                
-            fig = tm_obj.Single_Plot(crds,idt,IDt)
-            plt.show()
         
