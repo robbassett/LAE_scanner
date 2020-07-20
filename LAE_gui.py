@@ -14,6 +14,7 @@ import warnings
 
 import LAE_scanner as LAEs
 from Cube_clipper import MiniCubes as MC
+from Full_spectrum_widget import FSW
 from fig_init import *
 
 #warnings.filterwarnings("ignore")
@@ -24,22 +25,23 @@ class MAGPI_LAE_Scanner(tk.Frame):
         self.saved  = False
         self.output = {}
         self.index=0
+        self.done = False
         self.good_indices=[]
         self.createWidgets()
 
     def createWidgets(self):
-        canvas1 = tk.Canvas(root,width=1000,height=160)
+        canvas1 = tk.Canvas(root,width=1000,height=210)
         canvas1.pack()
 
-        label1 = tk.Label(root,text='MAGPI    LAE    SCANNER   beta')
+        label1 = tk.Label(root,text='MAGPI    LAE    SCANNER   v0.1')
         label1.config(font=('Comic Sans',30, 'bold'))
         canvas1.create_window(500,20,window=label1)
 
-        self.button0 = tk.Button(root, text='    --Enter Classifier--    ',command=self.enter_ID,font=('Arial',15,'bold'))
-        self.button1 = tk.Button(root, text='      --Select Cube--      ',command=self.get_cube,font=('Arial', 15, 'bold'),state='disabled') 
-        self.button2 = tk.Button(root, text='     --Select Catalog--     ', command=self.get_cat, font=('Arial', 15, 'bold'),state='disabled')
-        self.button3 = tk.Button(root, text='   --Start Classifying--   ', command=self.start_class, font=('Arial', 15, 'bold'),state='disabled')
-        self.button4 = tk.Button(root, text='    --Exit Application--    ', command=self.make_quit_dialog, font=('Arial', 15, 'bold'))
+        self.button0 = tk.Button(root, text='      Enter Classifier      ',command=self.enter_ID,font=('Arial',15,'bold'))
+        self.button1 = tk.Button(root, text='        Select Cube        ',command=self.get_cube,font=('Arial', 15, 'bold'),state='disabled') 
+        self.button2 = tk.Button(root, text='       Select Catalog       ', command=self.get_cat, font=('Arial', 15, 'bold'),state='disabled')
+        self.button3 = tk.Button(root, text='     Start Classifying     ', command=self.start_class, font=('Arial', 15, 'bold'),state='disabled')
+        self.button4 = tk.Button(root, text='      Exit Application      ', command=self.make_quit_dialog, font=('Arial', 15, 'bold'))
 
         canvas1.create_window(100, 50, window=self.button0)
         canvas1.create_window(300, 50, window=self.button1)
@@ -53,10 +55,13 @@ class MAGPI_LAE_Scanner(tk.Frame):
         self.catlab.config(font=('Comic Sans',15,'bold'))
         self.idlab = tk.Label(root,text=f'CLASSIFIER NAME: None')
         self.idlab.config(font=('Comic Sans',15,'bold'))
+        self.cmlab = tk.Label(root,text='')
+        self.cmlab.config(font=('Comic Sans',15,'bold'))
         
         canvas1.create_window(500,80,window=self.idlab)
         canvas1.create_window(500,100,window=self.cubelab)
         canvas1.create_window(500,120,window=self.catlab)
+        canvas1.create_window(500,140,window=self.cmlab)
 
         self.nextbutt = tk.Button(root,text='      Next      ',command=self.next_LAE,font=('Arial',15,'bold'),state='disabled')
         self.backbutt = tk.Button(root,text='      Back      ',command=self.last_LAE,font=('Arial',15,'bold'),state='disabled')
@@ -65,27 +70,25 @@ class MAGPI_LAE_Scanner(tk.Frame):
         LAElab = tk.Label(root,text='Is it a galaxy?')
         LAElab.config(font=('Comic Sans',15,'bold'))
         self.LAEdec = tk.StringVar(root)
-        self.LAEdec.set('Y')
-        LAEsel = tk.OptionMenu(root,self.LAEdec,'Y','N')
+        self.LAEdec.set('  No  ')
+        LAEsel = tk.OptionMenu(root,self.LAEdec,' Yes  ','  No  ','Unsure')
 
-        CONlab = tk.Label(root,text='Confidence?')
-        CONlab.config(font=('Comic Sans',15,'bold'))
-        self.CONdec = tk.StringVar(root)
-        self.CONdec.set('1')
-        CONsel = tk.OptionMenu(root,self.CONdec,'1','2','3','4','5')
+        self.commbutt = tk.Button(root,text=' Comment? ',command=self.add_comment,font=('Arial',15,'bold'),state='disabled')
+        self.comm = 'none'
+        self.fspcbutt = tk.Button(root,text=' Full Spectrum ',command=self.full_spectrum,font=('Arial',15,'bold'),state='disabled')
 
-        canvas1.create_window(200,150,window=LAElab)
-        canvas1.create_window(280,150,window=LAEsel)
-        canvas1.create_window(385,150,window=CONlab)
-        canvas1.create_window(460,150,window=CONsel)
-        canvas1.create_window(580,150,window=self.nextbutt)
-        canvas1.create_window(680,150,window=self.backbutt)
-        canvas1.create_window(780,150,window=self.savebutt)
-
+        canvas1.create_window(350,170,window=LAElab)
+        canvas1.create_window(450,170,window=LAEsel)
+        canvas1.create_window(540,170,window=self.commbutt)
+        canvas1.create_window(650,170,window=self.fspcbutt)
+        
+        canvas1.create_window(400,200,window=self.nextbutt)
+        canvas1.create_window(500,200,window=self.backbutt)
+        canvas1.create_window(600,200,window=self.savebutt)
         self.fig = make_fig()
         self.plot=FigureCanvasTkAgg(self.fig,master=root)
         self.plot.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
-
+        
     def enter_ID(self):
         self.button1['state'] = 'normal'
         self.il = tk.simpledialog.askstring('Who Are You?','Enter Classifier ID, No Spaces')
@@ -136,7 +139,7 @@ class MAGPI_LAE_Scanner(tk.Frame):
 
             else:
                 tk.messagebox.showinfo('CONGRATULATIONS!',f'You classified them all!')
-                
+                self.done = True
                 znc = np.random.randint(0,101)
                 #znc = 1
                 if znc == 1000:
@@ -166,9 +169,12 @@ class MAGPI_LAE_Scanner(tk.Frame):
         self.button0['state']  = 'disabled'
         self.button1['state']  = 'disabled'
         self.button2['state']  = 'disabled'
+        self.button3['state']  = 'disabled'
         self.nextbutt['state'] = 'normal'
         self.backbutt['state'] = 'normal'
         self.savebutt['state'] = 'normal'
+        self.commbutt['state'] = 'normal'
+        self.fspcbutt['state'] = 'normal'
 
         # CLIP CUBE:
         self.zcents,self.zstrt = MC(self.cat_name,self.cube_name)
@@ -181,9 +187,30 @@ class MAGPI_LAE_Scanner(tk.Frame):
         self.get_next_good()
         self.update_plot()
 
+    def add_comment(self):
+        combox=self.combox= tk.Tk()
+        combox.title('Enter Comment')
+        lab    = tk.Label(combox,text='Comment:').pack(side=tk.LEFT)
+        self.ce = tk.Entry(combox,width=50)
+        self.ce.pack(side=tk.LEFT)
+        butt   = tk.Button(combox,text='   Submit   ',command=self.comclean).pack(side=tk.LEFT)
+
+    def full_spectrum(self):
+        tmp_cube = LAEs.MAGPI_LAE_Check(self.cube_name,data_ind=1)
+        FSW(self.cube_name,[self.current_coords[0],self.current_coords[1],self.current_coords[2]+self.zstrt[self.cube_num]])
+
+    def comclean(self):
+        self.comm=self.ce.get()
+        self.cmlab.config(text=f'COMMENT: {self.comm}',fg='red')
+        self.combox.destroy()
+        
     def next_LAE(self):
+        sel_dic = {' Yes  ':1,'  No  ':2,'Unsure':3}
         tind = self.dorder[self.index]
-        self.output[str(tind)] = [self.LAEdec.get(),self.CONdec.get()]
+        print(tind,self.comm)
+        self.output[str(tind)] = {'Class':sel_dic[self.LAEdec.get()],'Comm':self.comm}
+        self.comm = 'none'
+        self.cmlab.config(text='                                                                                   ')
         self.index+=1
         self.get_next_good()
         self.update_plot()
@@ -194,6 +221,11 @@ class MAGPI_LAE_Scanner(tk.Frame):
         self.update_plot()
 
     def save_output(self):
+        if self.done:
+            sel_dic = {' Yes  ':1,'  No  ':2,'Unsure':3}
+            tind = self.dorder[self.index-1]
+            self.output[str(tind)] = {'Class':sel_dic[self.LAEdec.get()],'Comm':self.comm}
+        
         self.saved = True
         cu = self.cul.split('.')[0]
         ca = self.cal.split('.')[0]
@@ -209,12 +241,13 @@ class MAGPI_LAE_Scanner(tk.Frame):
         for i in range(17):
                 line = cat_print.readline()
                 out_print.write(line)
-        out_print.write('#	 8: LAE?\n')
-        out_print.write('#        9: Confidence\n')
+        out_print.write('#	 8: Galaxy? (y:1,n:2,?:3)\n')
         lines = cat_print.readlines()
         
         for k in self.output.keys():
-            out_print.write(lines[int(k)][:-1]+f'   {self.output[k][0]}   {self.output[k][1]}\n')
+            tclass,tcomm = self.output[k]['Class'],self.output[k]['Comm']
+            out_print.write(f'# Comment: {tcomm}\n')
+            out_print.write(lines[int(k)][:-1]+f'   {tclass}\n')
 
         out_print.close()
         tk.messagebox.showinfo('!!!',f'Output saved as {out_file_name}')
@@ -243,6 +276,6 @@ class MAGPI_LAE_Scanner(tk.Frame):
 if __name__ == '__main__':
     
     root=tk.Tk()
-    root.title('MAGPI LAE SCANNER beta')
+    root.title('MAGPI LAE SCANNER v0.1')
     app=MAGPI_LAE_Scanner(master=root)
     app.mainloop()

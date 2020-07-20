@@ -6,7 +6,7 @@ import glob
 
 
 
-def MiniCubes(catalog,cube_name,ncubes=20,_buffer=30):
+def MiniCubes(catalog,cube_name,ncubes=20,_buffer=50):
     chk = glob.glob('./tmp_cubes/')
     if len(chk) == 0:
         os.mkdir('./tmp_cubes/')
@@ -19,7 +19,7 @@ def MiniCubes(catalog,cube_name,ncubes=20,_buffer=30):
     cat = np.loadtxt(catalog,float)
     centz = np.zeros(ncubes)
     strtz = np.zeros(ncubes)
-    bin_edges = np.linspace(np.min(cat[:,4]),np.max(cat[:,4]),ncubes+1)
+    bin_edges = np.linspace(np.min(cat[:,4])-30.,np.max(cat[:,4])+30.,ncubes+1)
     for i in range(ncubes):
         if i == 0:
             czs = [0,int(bin_edges[0]+_buffer)]

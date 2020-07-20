@@ -10,13 +10,13 @@ import bottleneck as bn
 class MAGPI_LAE_Check(object):
 
     # Here file_in is the datacube.fits file and sum_rad is the aperture radius (in pixels)
-    def __init__(self,file_in,sum_rad=2.0):
+    def __init__(self,file_in,sum_rad=2.0,data_ind=0):
         self.sum_rad=sum_rad
         
         dc = pf.open(file_in)
-        self.data  = dc[0].data
-        self.noise = dc[1].data
-        self.head  = dc[0].header
+        self.data  = dc[data_ind].data
+        self.noise = dc[data_ind+1].data
+        self.head  = dc[data_ind].header
 
         mnoi = bn.nanmean(self.noise,axis=1)
         self.mean_noise = bn.nanmean(mnoi,axis=1)
@@ -47,7 +47,7 @@ class MAGPI_LAE_Check(object):
                 self.good=False
                 break
 
-    def Single_Plot(self,coords,idt,IDt,box_size=20,spec_size=50):
+    def Single_Plot(self,coords,idt,IDt,box_size=20,spec_size=70):
 
         self.current_coords = coords
         self.current_rad    = np.sqrt((self.xv-coords[0])**2.+(self.yv-coords[1])**2.)
@@ -107,3 +107,8 @@ class MAGPI_LAE_Check(object):
         plt.tight_layout()
         return F
         
+    def Full_Spectrum(self,coords):
+        self.current_rad    = np.sqrt((self.xv-coords[0])**2.+(self.yv-coords[1])**2.)
+
+        tr,tc = np.where(self.current_rad <= self.sum_rad)
+        return {'wav':self.wav,'spec':np.sum(self.data[:,tr,tc],axis=1),'lc':self.wav[int(coords[2])]}
