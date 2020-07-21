@@ -207,7 +207,6 @@ class MAGPI_LAE_Scanner(tk.Frame):
     def next_LAE(self):
         sel_dic = {' Yes  ':1,'  No  ':2,'Unsure':3}
         tind = self.dorder[self.index]
-        print(tind,self.comm)
         self.output[str(tind)] = {'Class':sel_dic[self.LAEdec.get()],'Comm':self.comm}
         self.comm = 'none'
         self.cmlab.config(text='                                                                                   ')
@@ -216,8 +215,11 @@ class MAGPI_LAE_Scanner(tk.Frame):
         self.update_plot()
 
     def last_LAE(self):
+        print(self.good_indices)
+        print(self.index)
         self.index = self.good_indices[-2]
         self.good_indices = self.good_indices[:-1]
+        self.get_next_good()
         self.update_plot()
 
     def save_output(self):
