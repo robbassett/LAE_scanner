@@ -95,20 +95,37 @@ class MAGPI_LAE_Scanner(tk.Frame):
     def load_prev(self):
         prev_file = tk.filedialog.askopenfilename(filetypes=[('Classifications','*.dat')])
         prev_file = open(prev_file,'r')
-        for i in range(4): l = prev_file.readline()
+        for i in range(2): l = prev_file.readline()
+        # get cube name 
+        self.cube_name = l.split(' ')[-1][:-1]
+        self.cul = self.cube_name.split('/')[-1]
+        self.cubelab.config(text=' '*250)
+        self.cubelab.config(text=f'CUBE NAME: {self.cul}')
+
+        # get catalog name
+        l = prev_file.readline()
+        self.cat_name = l.split(' ')[-1][:-1]
+        self.cal = self.cat_name.split('/')[-1]
+        self.catlab.config(text=' '*250)
+        self.catlab.config(text=f'CATALOG NAME: {self.cal}')
+
+        # get classifier name
+        l = prev_file.readline()
         self.il = l.split(' ')[-1][:-1]
         self.idlab.config(text=' '*250)
         self.idlab.config(text=f'CLASSIFIER NAME: {self.il}')
         for i in range(19): l = prev_file.readline()
+            
         ls = prev_file.readlines()
         for i in range(int(len(ls)/2.)):
-            com = ls[i*2].split(' ')[2][:-1]
+            com = ls[i*2].split('Comment: ')[-1][:-1]
             cl  = ls[(i*2)+1].split(' ')[-1][:-1]
             tid = ls[(i*2)+1].split(' ')[5]
             self.relcat['dets'].append(tid)
             self.relcat[str(tid)] = {'comment':com,'class':cl}
         self.relbutt['state'] = 'disabled'
-        self.button1['state'] = 'normal'
+        self.button0['state'] = 'disabled'
+        self.button3['state'] = 'normal'
         
     def enter_ID(self):
         self.button1['state'] = 'normal'
@@ -261,8 +278,8 @@ class MAGPI_LAE_Scanner(tk.Frame):
         out_file_name = tk.simpledialog.askstring('Save Classifications','Enter File Name:                                                     ',initialvalue=f'{cu}_{ca}_{self.il}_class.dat')
         out_print = open(out_file_name,'w')
         out_print.write('# MAGPI LAE SCANNER OUTPUTS:\n')
-        out_print.write(f'# Input cube = {self.cul}\n')
-        out_print.write(f'# Input catalog = {self.cal}\n')
+        out_print.write(f'# Input cube = {self.cube_name}\n')
+        out_print.write(f'# Input catalog = {self.cat_name}\n')
         out_print.write(f'# Classifier = {self.il}\n')
         out_print.write(f'#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n')
         for i in range(17):
