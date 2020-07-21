@@ -26,6 +26,7 @@ class MAGPI_LAE_Scanner(tk.Frame):
         self.output = {}
         self.index=0
         self.done = False
+        self.relcat = {'dets':[]}
         self.good_indices=[]
         self.createWidgets()
 
@@ -37,17 +38,19 @@ class MAGPI_LAE_Scanner(tk.Frame):
         label1.config(font=('Comic Sans',30, 'bold'))
         canvas1.create_window(500,20,window=label1)
 
+        self.relbutt = tk.Button(root, text='       Load Previous       ',command=self.load_prev,font=('Arial',15,'bold'))
         self.button0 = tk.Button(root, text='      Enter Classifier      ',command=self.enter_ID,font=('Arial',15,'bold'))
         self.button1 = tk.Button(root, text='        Select Cube        ',command=self.get_cube,font=('Arial', 15, 'bold'),state='disabled') 
         self.button2 = tk.Button(root, text='       Select Catalog       ', command=self.get_cat, font=('Arial', 15, 'bold'),state='disabled')
         self.button3 = tk.Button(root, text='     Start Classifying     ', command=self.start_class, font=('Arial', 15, 'bold'),state='disabled')
         self.button4 = tk.Button(root, text='      Exit Application      ', command=self.make_quit_dialog, font=('Arial', 15, 'bold'))
 
-        canvas1.create_window(100, 50, window=self.button0)
-        canvas1.create_window(300, 50, window=self.button1)
-        canvas1.create_window(500, 50, window=self.button2)
-        canvas1.create_window(700, 50, window=self.button3)
-        canvas1.create_window(900, 50, window=self.button4)
+        canvas1.create_window(75,50,window=self.relbutt)
+        canvas1.create_window(250, 50, window=self.button0)
+        canvas1.create_window(425, 50, window=self.button1)
+        canvas1.create_window(600, 50, window=self.button2)
+        canvas1.create_window(775, 50, window=self.button3)
+        canvas1.create_window(950, 50, window=self.button4)
 
         self.cubelab = tk.Label(root,text=f'   CUBE NAME: None   ')
         self.cubelab.config(font=('Comic Sans',15,'bold'))
@@ -88,6 +91,24 @@ class MAGPI_LAE_Scanner(tk.Frame):
         self.fig = make_fig()
         self.plot=FigureCanvasTkAgg(self.fig,master=root)
         self.plot.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
+
+    def load_prev(self):
+        prev_file = tk.filedialog.askopenfilename(filetypes=[('Classifications','*.dat')])
+        prev_file = open(prev_file,'r')
+        for i in range(4): l = prev_file.readline()
+        self.il = l.split(' ')[-1][:-1]
+        self.idlab.config(text=' '*250)
+        self.idlab.config(text=f'CLASSIFIER NAME: {self.il}')
+        for i in range(19): l = prev_file.readline()
+        ls = prev_file.readlines()
+        for i in range(int(len(ls)/2.)):
+            com = ls[i*2].split(' ')[2][:-1]
+            cl  = ls[(i*2)+1].split(' ')[-1][:-1]
+            tid = ls[(i*2)+1].split(' ')[5]
+            self.relcat['dets'].append(tid)
+            self.relcat[str(tid)] = {'comment':com,'class':cl}
+        self.relbutt['state'] = 'disabled'
+        self.button1['state'] = 'normal'
         
     def enter_ID(self):
         self.button1['state'] = 'normal'
@@ -120,22 +141,28 @@ class MAGPI_LAE_Scanner(tk.Frame):
         while fl == 0:
             if self.index < self.catalog.shape[0]:
                 tind = self.dorder[self.index]
-                idt = str(self.catalog[tind,0])
-                crds= [float(self.catalog[tind,2]),float(self.catalog[tind,3]),float(self.catalog[tind,4])]
-
-                # Check if object still in current minicube:
-                minz= np.where(np.abs(self.zcents-crds[2]) == np.min(np.abs(self.zcents-crds[2])))[0]
-                if minz != self.cube_num:
-                    self.cube_num = minz[0]
-                    self.data_cube = LAEs.MAGPI_LAE_Check(f'./tmp_cubes/cube_{self.cube_num}.fits')
-
-                ncrds = [crds[0],crds[1],crds[2]-self.zstrt[self.cube_num]]
-                self.data_cube.Check_Edge(ncrds)
-            
-                if self.data_cube.good:
-                    fl=1
-                else:
+                idt = str(int(self.catalog[tind,0]))
+                # If reloading, check if currennt object in previous classifications
+                if idt in self.relcat['dets']:
+                    self.output[str(tind)] = {'Class':self.relcat[idt]['class'],'Comm':self.relcat[idt]['comment']}
                     self.index+=1
+                else:
+                
+                    crds= [float(self.catalog[tind,2]),float(self.catalog[tind,3]),float(self.catalog[tind,4])]
+
+                    # Check if object still in current minicube:
+                    minz= np.where(np.abs(self.zcents-crds[2]) == np.min(np.abs(self.zcents-crds[2])))[0]
+                    if minz != self.cube_num:
+                        self.cube_num = minz[0]
+                        self.data_cube = LAEs.MAGPI_LAE_Check(f'./tmp_cubes/cube_{self.cube_num}.fits')
+
+                    ncrds = [crds[0],crds[1],crds[2]-self.zstrt[self.cube_num]]
+                    self.data_cube.Check_Edge(ncrds)
+            
+                    if self.data_cube.good:
+                        fl=1
+                    else:
+                        self.index+=1
 
             else:
                 tk.messagebox.showinfo('CONGRATULATIONS!',f'You classified them all!')
@@ -209,14 +236,12 @@ class MAGPI_LAE_Scanner(tk.Frame):
         tind = self.dorder[self.index]
         self.output[str(tind)] = {'Class':sel_dic[self.LAEdec.get()],'Comm':self.comm}
         self.comm = 'none'
-        self.cmlab.config(text='                                                                                   ')
+        self.cmlab.config(text=' '*250)
         self.index+=1
         self.get_next_good()
         self.update_plot()
 
     def last_LAE(self):
-        print(self.good_indices)
-        print(self.index)
         self.index = self.good_indices[-2]
         self.good_indices = self.good_indices[:-1]
         self.get_next_good()
@@ -268,8 +293,8 @@ class MAGPI_LAE_Scanner(tk.Frame):
         qlab.config(font=('Comic Sans',15, 'bold'))
         canvas2.create_window(200,10,window=qlab)
 
-        but1 = tk.Button(quit_dialog, text='   --Quit--    ',command=root.quit,font=('Arial',15,'bold'))
-        but2 = tk.Button(quit_dialog, text=' --Dont Quit-- ',command=quit_dialog.destroy,font=('Arial',15,'bold'))
+        but1 = tk.Button(quit_dialog, text='     Quit      ',command=root.quit,font=('Arial',15,'bold'))
+        but2 = tk.Button(quit_dialog, text='   Dont Quit   ',command=quit_dialog.destroy,font=('Arial',15,'bold'))
 
         canvas2.create_window(100,40,window=but1)
         canvas2.create_window(300,40,window=but2)
