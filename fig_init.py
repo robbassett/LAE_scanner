@@ -91,5 +91,27 @@ def make_fig():
     an.set_path_effects([path_effects.Stroke(linewidth=12,foreground=tmc1),path_effects.Normal()])
     an=ax.annotate(line1,xy=(2,-1.),color=tmc2,fontsize=18,zorder=1010)
     an.set_path_effects([path_effects.Stroke(linewidth=5,foreground='w'),path_effects.Normal()])
+    plt.tight_layout()
+    return fig
 
+def make_bad_dudes(): 
+    
+    fig = plt.figure(figsize=(14,5))
+    ax  = fig.add_subplot(111)
+    bim = plt.imread(f'./images/bad_dudes.png')
+    ax.imshow(bim,aspect='auto')
+    ax.set_xticks([])
+    ax.set_yticks([])
+    plt.tight_layout()
+    return fig
+
+def make_zanac(): 
+    
+    fig = plt.figure(figsize=(14,5))
+    ax  = fig.add_subplot(111)
+    bim = plt.imread(f'./images/zanac.png')
+    ax.imshow(bim,aspect='auto')
+    ax.set_xticks([])
+    ax.set_yticks([])
+    plt.tight_layout()
     return fig

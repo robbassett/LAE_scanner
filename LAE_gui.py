@@ -88,7 +88,12 @@ class MAGPI_LAE_Scanner(tk.Frame):
         canvas1.create_window(400,200,window=self.nextbutt)
         canvas1.create_window(500,200,window=self.backbutt)
         canvas1.create_window(600,200,window=self.savebutt)
-        self.fig = make_fig()
+
+        bdcheck = np.random.randint(0,51,1)
+        if bdcheck == 1:
+            self.fig = make_bad_dudes()
+        else:
+            self.fig = make_fig()
         self.plot=FigureCanvasTkAgg(self.fig,master=root)
         self.plot.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
 
@@ -182,13 +187,13 @@ class MAGPI_LAE_Scanner(tk.Frame):
                         self.index+=1
 
             else:
+                zfg = make_zanac()
+                self.plot.get_tk_widget().pack_forget()
+                plt.close('all')
+                self.plot = FigureCanvasTkAgg(zfg, root) 
+                self.plot.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
                 tk.messagebox.showinfo('CONGRATULATIONS!',f'You classified them all!')
                 self.done = True
-                znc = np.random.randint(0,101)
-                #znc = 1
-                if znc == 1000:
-                    make_zanac()
-
                 self.save_output()
                 
                 fl = 2
