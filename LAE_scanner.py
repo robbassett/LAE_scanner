@@ -88,7 +88,10 @@ class MAGPI_LAE_Check(object):
         xa.plot(self.wav[tz],self.mean_noise[tz],'r-')
         xa.set_ylabel('Noise',color='r',rotation=-90,labelpad=15,fontsize=18)
         xa.tick_params(axis='y',color='r',labelcolor='r')
-        ax.fill_between([self.wav[imz[0]],self.wav[imz[-1]]],1e15,-500,color='limegreen',alpha=.25)
+        try:
+            ax.fill_between([self.wav[imz[0]],self.wav[imz[-1]]],1e15,-500,color='limegreen',alpha=.25)
+        except:
+            pass
         ax.set_xlabel(r'$\lambda_{obs}$ ${\AA}$',fontsize=18)
         xa.tick_params(axis='y',labelsize=15)
         ax.tick_params(axis='both',labelsize=15)

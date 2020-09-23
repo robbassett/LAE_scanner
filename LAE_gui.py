@@ -3,6 +3,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
+from shutil import copyfile
 
 import tkinter as tk
 import tkinter.messagebox
@@ -28,6 +29,8 @@ class MAGPI_LAE_Scanner(tk.Frame):
         self.done = False
         self.relcat = {'dets':[]}
         self.good_indices=[]
+        self.prevs=[]
+        self.prev = False
         self.createWidgets()
 
     def createWidgets(self):
@@ -99,6 +102,7 @@ class MAGPI_LAE_Scanner(tk.Frame):
 
     def load_prev(self):
         prev_file = tk.filedialog.askopenfilename(filetypes=[('Classifications','*.dat')])
+        pvfnm = prev_file
         prev_file = open(prev_file,'r')
         for i in range(2): l = prev_file.readline()
         # get cube name 
@@ -123,11 +127,15 @@ class MAGPI_LAE_Scanner(tk.Frame):
             
         ls = prev_file.readlines()
         for i in range(int(len(ls)/2.)):
-            com = ls[i*2].split('Comment: ')[-1][:-1]
-            cl  = ls[(i*2)+1].split(' ')[-1][:-1]
-            tid = ls[(i*2)+1].split(' ')[5]
-            self.relcat['dets'].append(tid)
-            self.relcat[str(tid)] = {'comment':com,'class':cl}
+            #com = ls[i*2].split('Comment: ')[-1][:-1]
+            #cl  = ls[(i*2)+1].split(' ')[-1][:-1]
+            tid = ls[(i*2)+1].split()[0]
+            #self.relcat['dets'].append(tid)
+            #self.relcat[str(tid)] = {'comment':com,'class':cl}
+            self.prevs.append(str(tid))
+
+        self.prev = True
+        self.prevfile = pvfnm
         self.relbutt['state'] = 'disabled'
         self.button0['state'] = 'disabled'
         self.button3['state'] = 'normal'
@@ -165,8 +173,9 @@ class MAGPI_LAE_Scanner(tk.Frame):
                 tind = self.dorder[self.index]
                 idt = str(int(self.catalog[tind,0]))
                 # If reloading, check if currennt object in previous classifications
-                if idt in self.relcat['dets']:
-                    self.output[str(tind)] = {'Class':self.relcat[idt]['class'],'Comm':self.relcat[idt]['comment']}
+                if idt in self.prevs:
+                    print(idt)
+                    #self.output[str(tind)] = {'Class':self.relcat[idt]['class'],'Comm':self.relcat[idt]['comment']}
                     self.index+=1
                 else:
                 
@@ -279,20 +288,44 @@ class MAGPI_LAE_Scanner(tk.Frame):
         cu = self.cul.split('.')[0]
         ca = self.cal.split('.')[0]
         
-        cat_print = open(self.cat_name,'r')
         out_file_name = tk.simpledialog.askstring('Save Classifications','Enter File Name:                                                     ',initialvalue=f'{cu}_{ca}_{self.il}_class.dat')
+        print(out_file_name)
+        print(self.prevfile.split('/')[-1])
+        if out_file_name == self.prevfile.split('/')[-1]:
+            print('Overwriting previous')
+            copyfile(self.prevfile,'./tmp.dat')
+            self.prevfile = './tmp.dat'
+            
         out_print = open(out_file_name,'w')
-        out_print.write('# MAGPI LAE SCANNER OUTPUTS:\n')
-        out_print.write(f'# Input cube = {self.cube_name}\n')
-        out_print.write(f'# Input catalog = {self.cat_name}\n')
-        out_print.write(f'# Classifier = {self.il}\n')
-        out_print.write(f'#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n')
-        for i in range(17):
+
+        if self.prev:
+            prev_file = open(self.prevfile,'r')
+            lines = prev_file.readlines()
+            for line in lines:
+                out_print.write(line)
+            cat_print = open(self.cat_name,'r')
+            for i in range(17): cat_print.readline()
+            lines = cat_print.readlines()
+            print(len(lines))
+                
+        else:
+            cat_print = open(self.cat_name,'r')
+            out_print.write('# MAGPI LAE SCANNER OUTPUTS:\n')
+            out_print.write(f'# Input cube = {self.cube_name}\n')
+            out_print.write(f'# Input catalog = {self.cat_name}\n')
+            out_print.write(f'# Classifier = {self.il}\n')
+            out_print.write(f'#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n')
+            for i in range(17):
                 line = cat_print.readline()
                 out_print.write(line)
-        out_print.write('#	 8: Galaxy? (y:1,n:2,?:3)\n')
-        lines = cat_print.readlines()
-        
+            out_print.write('#	 8: Galaxy? (y:1,n:2,?:3)\n')
+            lines = cat_print.readlines()
+
+        print('\n')
+        print(self.output.keys())
+        print(len(lines))
+        print(lines[0])
+        print('\n')
         for k in self.output.keys():
             tclass,tcomm = self.output[k]['Class'],self.output[k]['Comm']
             out_print.write(f'# Comment: {tcomm}\n')
