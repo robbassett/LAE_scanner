@@ -4,6 +4,22 @@ import matplotlib.cm as cm
 import astropy.io.fits as pf
 import bottleneck as bn
 
+def plot_step_spectrum(wav,spec,ax):
+    nwav = np.zeros(len(wav)*2+2)
+    nspc = np.zeros(len(wav)*2+2)
+    dw = (wav[1]-wav[0])/2.
+
+    for i in range(len(wav)):
+        for j in range(2): nwav[(i*2)+j] = wav[i]
+        nspc[i*2] = spec[i]
+        try:
+            nspc[(i*2)+1] = spec[i+1]
+        except:
+            nspc[(i*2)+1] = spec[i]
+
+    tp = np.where((nwav > wav.min())&(nwav < wav.max()))[0]
+    ax.plot(nwav[tp]+dw,nspc[tp],'k-')
+
 # This class reads in the MAGPI datacube and creates
 # an object capable of displaying the aperture spectrum
 # and narrow-band image of each candidate
@@ -81,7 +97,8 @@ class MAGPI_LAE_Check(object):
 
         # Display spectrum
         ax = F.add_subplot(121)
-        ax.plot(self.wav[tz],self.current_spec[tz],'k-')
+        #ax.plot(self.wav[tz],self.current_spec[tz],'k-')
+        plot_step_spectrum(self.wav[tz],self.current_spec[tz],ax)
         ax.set_title(f'Detection #{int(float(idt))}, Object #{int(float(IDt))}',fontsize=18)
         ax.set_ylabel('Signal',fontsize=18)
         xa = ax.twinx()
