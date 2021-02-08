@@ -174,7 +174,6 @@ class MAGPI_LAE_Scanner(tk.Frame):
                 idt = str(int(self.catalog[tind,0]))
                 # If reloading, check if currennt object in previous classifications
                 if idt in self.prevs:
-                    print(idt)
                     #self.output[str(tind)] = {'Class':self.relcat[idt]['class'],'Comm':self.relcat[idt]['comment']}
                     self.index+=1
                 else:
@@ -183,9 +182,11 @@ class MAGPI_LAE_Scanner(tk.Frame):
 
                     # Check if object still in current minicube:
                     minz= np.where(np.abs(self.zcents-crds[2]) == np.min(np.abs(self.zcents-crds[2])))[0]
+                    if len(minz) > 1: minz=[minz[-1]]
                     if minz != self.cube_num:
                         self.cube_num = minz[0]
                         self.data_cube = LAEs.MAGPI_LAE_Check(f'./tmp_cubes/cube_{self.cube_num}.fits')
+                        
 
                     ncrds = [crds[0],crds[1],crds[2]-self.zstrt[self.cube_num]]
                     self.data_cube.Check_Edge(ncrds)
@@ -289,12 +290,12 @@ class MAGPI_LAE_Scanner(tk.Frame):
         ca = self.cal.split('.')[0]
         
         out_file_name = tk.simpledialog.askstring('Save Classifications','Enter File Name:                                                     ',initialvalue=f'{cu}_{ca}_{self.il}_class.dat')
-        print(out_file_name)
-        print(self.prevfile.split('/')[-1])
-        if out_file_name == self.prevfile.split('/')[-1]:
-            print('Overwriting previous')
-            copyfile(self.prevfile,'./tmp.dat')
-            self.prevfile = './tmp.dat'
+
+        if self.prev:
+            if out_file_name == self.prevfile.split('/')[-1]:
+                print('Overwriting previous')
+                copyfile(self.prevfile,'./tmp.dat')
+                self.prevfile = './tmp.dat'
             
         out_print = open(out_file_name,'w')
 

@@ -49,6 +49,7 @@ class MAGPI_LAE_Check(object):
 
     def Check_Edge(self,coords,box_size=20):
 
+        """
         checks = [[coords[0]-box_size,coords[1]],
                   [coords[0]+box_size,coords[1]],
                   [coords[0],coords[1]-box_size],
@@ -62,6 +63,8 @@ class MAGPI_LAE_Check(object):
             if len(tch) == 0:
                 self.good=False
                 break
+        """
+        self.good=True
 
     def Single_Plot(self,coords,idt,IDt,box_size=20,spec_size=70):
 
