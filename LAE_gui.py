@@ -309,9 +309,12 @@ class MAGPI_LAE_Scanner(tk.Frame):
             for line in lines:
                 out_print.write(line)
             cat_print = open(self.cat_name,'r')
-            for i in range(17): cat_print.readline()
+            head_done = False
+            while not head_done:
+                tm = cat_print.readline()
+                if 'DETSN_MAX' in tm:
+                    head_done = True
             lines = cat_print.readlines()
-            print(len(lines))
                 
         else:
             cat_print = open(self.cat_name,'r')
@@ -320,9 +323,12 @@ class MAGPI_LAE_Scanner(tk.Frame):
             out_print.write(f'# Input catalog = {self.cat_name}\n')
             out_print.write(f'# Classifier = {self.il}\n')
             out_print.write(f'#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n')
-            for i in range(17):
+            head_done = False
+            while not head_done:
                 line = cat_print.readline()
                 out_print.write(line)
+                if 'DETSN_MAX' in line:
+                    head_done = True
             out_print.write('#	 8: Galaxy? (y:1,n:2,?:3)\n')
             lines = cat_print.readlines()
 
