@@ -123,7 +123,11 @@ class MAGPI_LAE_Scanner(tk.Frame):
         self.il = l.split(' ')[-1][:-1]
         self.idlab.config(text=' '*250)
         self.idlab.config(text=f'CLASSIFIER NAME: {self.il}')
-        for i in range(19): l = prev_file.readline()
+        head_done = False
+        while not head_done:
+            l = prev_file.readline()
+            if 'Galaxy?' in l:
+                head_done = True
             
         ls = prev_file.readlines()
         for i in range(int(len(ls)/2.)):
