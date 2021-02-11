@@ -18,7 +18,7 @@ from Cube_clipper import MiniCubes as MC
 from Full_spectrum_widget import FSW
 from fig_init import *
 
-#warnings.filterwarnings("ignore")
+warnings.filterwarnings("ignore")
 
 class MAGPI_LAE_Scanner(tk.Frame):
     def __init__(self,master=None):
@@ -131,11 +131,7 @@ class MAGPI_LAE_Scanner(tk.Frame):
             
         ls = prev_file.readlines()
         for i in range(int(len(ls)/2.)):
-            #com = ls[i*2].split('Comment: ')[-1][:-1]
-            #cl  = ls[(i*2)+1].split(' ')[-1][:-1]
             tid = ls[(i*2)+1].split()[0]
-            #self.relcat['dets'].append(tid)
-            #self.relcat[str(tid)] = {'comment':com,'class':cl}
             self.prevs.append(str(tid))
 
         self.prev = True
@@ -178,7 +174,6 @@ class MAGPI_LAE_Scanner(tk.Frame):
                 idt = str(int(self.catalog[tind,0]))
                 # If reloading, check if currennt object in previous classifications
                 if idt in self.prevs:
-                    #self.output[str(tind)] = {'Class':self.relcat[idt]['class'],'Comm':self.relcat[idt]['comment']}
                     self.index+=1
                 else:
                 
@@ -278,7 +273,7 @@ class MAGPI_LAE_Scanner(tk.Frame):
         self.update_plot()
 
     def last_LAE(self):
-        self.index = self.good_indices[-2]
+        self.index -= 1
         self.good_indices = self.good_indices[:-1]
         self.get_next_good()
         self.update_plot()
@@ -332,11 +327,6 @@ class MAGPI_LAE_Scanner(tk.Frame):
             out_print.write('#	 8: Galaxy? (y:1,n:2,?:3)\n')
             lines = cat_print.readlines()
 
-        print('\n')
-        print(self.output.keys())
-        print(len(lines))
-        print(lines[0])
-        print('\n')
         for k in self.output.keys():
             tclass,tcomm = self.output[k]['Class'],self.output[k]['Comm']
             out_print.write(f'# Comment: {tcomm}\n')

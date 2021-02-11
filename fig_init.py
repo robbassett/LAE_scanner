@@ -16,7 +16,7 @@ def make_fig():
                   ['forestgreen','springgreen','palegreen','yellowgreen','green'],
                   ['red','maroon','salmon','sienna','lightcoral'],
                   ['steelblue','cyan','teal','turquoise','royalblue'],
-                  ['yellow','darkkhaki','olivedrab','chartreuse','yellowgreen'],
+                  ['gold','darkkhaki','olivedrab','chartreuse','yellowgreen'],
                   ['gainsboro','silver','grey','dimgrey','k']]
     cis = np.random.randint(0,7,3)
     ns = np.random.randint(5,25,3)
