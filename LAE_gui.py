@@ -177,14 +177,15 @@ class MAGPI_LAE_Scanner(tk.Frame):
                     self.index+=1
                 else:
                 
-                    crds= [float(self.catalog[tind,2]),float(self.catalog[tind,3]),float(self.catalog[tind,4])]
+                    crds= [float(self.catalog[tind,_]) for _ in [2,3,4]]
 
                     # Check if object still in current minicube:
-                    minz= np.where(np.abs(self.zcents-crds[2]) == np.min(np.abs(self.zcents-crds[2])))[0]
-                    if len(minz) > 1: minz=[minz[-1]]
+                    minz= np.argmin(np.abs(self.zcents-crds[2]))
                     if minz != self.cube_num:
-                        self.cube_num = minz[0]
+                        self.cube_num = minz
+                        print(self.cube_num)
                         self.data_cube = LAEs.MAGPI_LAE_Check(f'./tmp_cubes/cube_{self.cube_num}.fits')
+                        print(self.data_cube.wav_ind)
                         
 
                     ncrds = [crds[0],crds[1],crds[2]-self.zstrt[self.cube_num]]

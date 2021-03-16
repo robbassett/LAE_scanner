@@ -19,14 +19,10 @@ def MiniCubes(catalog,cube_name,ncubes=20,_buffer=50):
     cat = np.loadtxt(catalog,float)
     centz = np.zeros(ncubes)
     strtz = np.zeros(ncubes)
-    bin_edges = np.linspace(np.min(cat[:,4])-30.,np.max(cat[:,4])+30.,ncubes+1)
+    bin_edges = np.linspace(_buffer,np.max(cat[:,4])+30.,ncubes+1)
+ 
     for i in range(ncubes):
-        if i == 0:
-            czs = [0,int(bin_edges[0]+_buffer)]
-        elif i == ncubes-1:
-            czs = [int(bin_edges[-2]-_buffer),int(bin_edges[-1])]
-        else:
-            czs = [int(bin_edges[i-1]-_buffer),int(bin_edges[i]+_buffer)]
+        czs = [int(bin_edges[i]-_buffer),int(bin_edges[i+1]+_buffer)]
 
         hdu1 = pf.PrimaryHDU(sig[czs[0]:czs[1],:,:])
         hdu2 = pf.ImageHDU(noi[czs[0]:czs[1],:,:])

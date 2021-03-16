@@ -74,7 +74,6 @@ class MAGPI_LAE_Check(object):
         tr,tc = np.where(self.current_rad <= self.sum_rad)
         tz    = np.where(np.abs(self.wav_ind-coords[2]) <= spec_size)[0]
 
-
         imr = np.linspace(int(coords[0]-box_size),int(coords[0]+box_size),int((2.*box_size)+1.),dtype=int)
         imc = np.linspace(int(coords[1]-box_size),int(coords[1]+box_size),int((2.*box_size)+1.),dtype=int)
         imz = np.where(np.abs(self.wav_ind-coords[2]) <= 3.)[0]
@@ -88,11 +87,11 @@ class MAGPI_LAE_Check(object):
         self.current_img  = self.data[imz,:,:]
         self.current_img  = self.current_img[:,imc,:]
         self.current_img  = self.current_img[:,:,imr]
-        self.current_img  = np.sum(self.current_img-subv,axis=0)
+        self.current_img  = np.nansum(self.current_img-subv,axis=0)
 
         subtot = bn.nanmean(subtot,axis=0)
         self.tot_img = self.data[imz,:,:]
-        self.tot_img = np.sum(self.tot_img-subtot,axis=0)
+        self.tot_img = np.nansum(self.tot_img-subtot,axis=0)
 
         tzc = np.where(np.abs(self.wav_ind-coords[2]) <= 6.)[0]
         
@@ -100,7 +99,6 @@ class MAGPI_LAE_Check(object):
 
         # Display spectrum
         ax = F.add_subplot(121)
-        #ax.plot(self.wav[tz],self.current_spec[tz],'k-')
         plot_step_spectrum(self.wav[tz],self.current_spec[tz],ax)
         ax.set_title(f'Detection #{int(float(idt))}, Object #{int(float(IDt))}',fontsize=18)
         ax.set_ylabel('Signal',fontsize=18)
@@ -115,7 +113,10 @@ class MAGPI_LAE_Check(object):
         ax.set_xlabel(r'$\lambda_{obs}$ ${\AA}$',fontsize=18)
         xa.tick_params(axis='y',labelsize=15)
         ax.tick_params(axis='both',labelsize=15)
-        ax.set_ylim(np.nanmin(self.current_spec[tz])*1.2,np.nanmax(self.current_spec[tz]*1.2))
+        try:
+            ax.set_ylim(np.nanmin(self.current_spec[tz])*1.2,np.nanmax(self.current_spec[tz]*1.2))
+        except:
+            pass
 
         # Display narrow-band image
         ax = F.add_subplot(122)
