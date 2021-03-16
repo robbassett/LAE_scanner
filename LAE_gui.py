@@ -37,7 +37,7 @@ class MAGPI_LAE_Scanner(tk.Frame):
         canvas1 = tk.Canvas(root,width=1000,height=210)
         canvas1.pack()
 
-        label1 = tk.Label(root,text='MAGPI    LAE    SCANNER   v0.1')
+        label1 = tk.Label(root,text='MAGPI    LAE    SCANNER   v1.0')
         label1.config(font=('Comic Sans',30, 'bold'))
         canvas1.create_window(500,20,window=label1)
 
@@ -183,9 +183,7 @@ class MAGPI_LAE_Scanner(tk.Frame):
                     minz= np.argmin(np.abs(self.zcents-crds[2]))
                     if minz != self.cube_num:
                         self.cube_num = minz
-                        print(self.cube_num)
                         self.data_cube = LAEs.MAGPI_LAE_Check(f'./tmp_cubes/cube_{self.cube_num}.fits')
-                        print(self.data_cube.wav_ind)
                         
 
                     ncrds = [crds[0],crds[1],crds[2]-self.zstrt[self.cube_num]]
