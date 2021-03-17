@@ -19,6 +19,7 @@ from Full_spectrum_widget import FSW
 from fig_init import *
 
 warnings.filterwarnings("ignore")
+VNUM = '1.0'
 
 class MAGPI_LAE_Scanner(tk.Frame):
     def __init__(self,master=None):
@@ -32,12 +33,14 @@ class MAGPI_LAE_Scanner(tk.Frame):
         self.prevs=[]
         self.prev = False
         self.createWidgets()
+        self.class_count = 0
+        self.auto_save_n = 10
 
     def createWidgets(self):
         canvas1 = tk.Canvas(root,width=1000,height=210)
         canvas1.pack()
 
-        label1 = tk.Label(root,text='MAGPI    LAE    SCANNER   v1.0')
+        label1 = tk.Label(root,text=f'MAGPI    LAE    SCANNER   v{VNUM}')
         label1.config(font=('Comic Sans',30, 'bold'))
         canvas1.create_window(500,20,window=label1)
 
@@ -172,7 +175,7 @@ class MAGPI_LAE_Scanner(tk.Frame):
             if self.index < self.catalog.shape[0]:
                 tind = self.dorder[self.index]
                 idt = str(int(self.catalog[tind,0]))
-                # If reloading, check if currennt object in previous classifications
+                # If reloading, check if current object in previous classifications
                 if idt in self.prevs:
                     self.index+=1
                 else:
@@ -210,6 +213,8 @@ class MAGPI_LAE_Scanner(tk.Frame):
             root.quit()
         self.good_indices.append(tind)
         self.current_coords = ncrds
+        self.class_count += 1
+        if self.class_count%self.auto_save_n == 0: self.save_output(auto=True)
         
     def update_plot(self):
         tind = self.dorder[self.index]
@@ -277,7 +282,7 @@ class MAGPI_LAE_Scanner(tk.Frame):
         self.get_next_good()
         self.update_plot()
 
-    def save_output(self):
+    def save_output(self,auto=False):
         if self.done:
             sel_dic = {' Yes  ':1,'  No  ':2,'Unsure':3}
             tind = self.dorder[self.index-1]
@@ -286,8 +291,11 @@ class MAGPI_LAE_Scanner(tk.Frame):
         self.saved = True
         cu = self.cul.split('.')[0]
         ca = self.cal.split('.')[0]
-        
-        out_file_name = tk.simpledialog.askstring('Save Classifications','Enter File Name:                                                     ',initialvalue=f'{cu}_{ca}_{self.il}_class.dat')
+
+        if auto:
+            out_file_name = f'{cu}_{ca}_{self.il}_class.dat'
+        else:
+            out_file_name = tk.simpledialog.askstring('Save Classifications','Enter File Name:                                                     ',initialvalue=f'{cu}_{ca}_{self.il}_class.dat')
 
         if self.prev:
             if out_file_name == self.prevfile.split('/')[-1]:
@@ -332,8 +340,11 @@ class MAGPI_LAE_Scanner(tk.Frame):
             out_print.write(lines[int(k)][:-1]+f'   {tclass}\n')
 
         out_print.close()
-        tk.messagebox.showinfo('!!!',f'Output saved as {out_file_name}')
-        self.make_quit_dialog()
+        if not auto:
+            tk.messagebox.showinfo('!!!',f'Output saved as {out_file_name}')
+            self.make_quit_dialog()
+        else:
+            print(f'Output saved as {out_file_name}')
         
     def make_quit_dialog(self):
         if not self.saved:
@@ -358,6 +369,6 @@ class MAGPI_LAE_Scanner(tk.Frame):
 if __name__ == '__main__':
     
     root=tk.Tk()
-    root.title('MAGPI LAE SCANNER v0.1')
+    root.title(f'MAGPI LAE SCANNER v{VNUM}')
     app=MAGPI_LAE_Scanner(master=root)
     app.mainloop()

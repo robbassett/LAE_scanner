@@ -83,7 +83,7 @@ class MAGPI_LAE_Check(object):
         subv= subv[:,:,imr]
         subv= bn.nanmean(subv,axis=0)
 
-        self.current_spec = np.sum(self.data[:,tr,tc],axis=1)
+        self.current_spec = np.nansum(self.data[:,tr,tc],axis=1)
         self.current_img  = self.data[imz,:,:]
         self.current_img  = self.current_img[:,imc,:]
         self.current_img  = self.current_img[:,:,imr]
