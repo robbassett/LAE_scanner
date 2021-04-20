@@ -66,7 +66,7 @@ class MAGPI_LAE_Check(object):
         """
         self.good=True
 
-    def Single_Plot(self,coords,idt,IDt,box_size=20,spec_size=70):
+    def Single_Plot(self,coords,idt,IDt,box_size=20,spec_size=70, nbvmax=None):
 
         self.current_coords = coords
         self.current_rad    = np.sqrt((self.xv-coords[0])**2.+(self.yv-coords[1])**2.)
@@ -121,7 +121,14 @@ class MAGPI_LAE_Check(object):
         # Display narrow-band image
         ax = F.add_subplot(122)
         aperture = plt.Circle((box_size,box_size), self.sum_rad, fc='None',ec='w')
-        ax.imshow(self.current_img,origin='lower',vmin=-8,cmap=cm.inferno)
+        if nbvmax!=None:
+            vmax = np.nanmin(self.current_img) +  ((np.nanmax(self.current_img)-np.nanmin(self.current_img)) * (nbvmax/100) )
+            if vmax <=-8: 
+                vmax=None
+            ax.imshow(self.current_img,origin='lower',vmin=-8, vmax=vmax, cmap=cm.inferno)
+        else:
+            ax.imshow(self.current_img,origin='lower',vmin=-8,cmap=cm.inferno)
+
         ax.add_patch(aperture)
         ax.set_xticks([])
         ax.set_yticks([])
@@ -129,7 +136,7 @@ class MAGPI_LAE_Check(object):
         ax.set_xlabel(f'x, y, z: {int(coords[0])}, {int(coords[1])}, {int(coords[2])}',fontsize=18)
         
         plt.tight_layout()
-        return F
+        return F, np.nanmax(self.current_img)
         
     def Full_Spectrum(self,coords):
         self.current_rad    = np.sqrt((self.xv-coords[0])**2.+(self.yv-coords[1])**2.)

@@ -44,19 +44,19 @@ class MAGPI_LAE_Scanner(tk.Frame):
         label1.config(font=('Comic Sans',30, 'bold'))
         canvas1.create_window(500,20,window=label1)
 
-        self.relbutt = tk.Button(root, text='       Load Previous       ',command=self.load_prev,font=('Arial',15,'bold'))
+        self.relbutt = tk.Button(root, text=' Load Previous ',command=self.load_prev,font=('Arial',15,'bold'))
         self.button0 = tk.Button(root, text='      Enter Classifier      ',command=self.enter_ID,font=('Arial',15,'bold'))
         self.button1 = tk.Button(root, text='        Select Cube        ',command=self.get_cube,font=('Arial', 15, 'bold'),state='disabled') 
         self.button2 = tk.Button(root, text='       Select Catalog       ', command=self.get_cat, font=('Arial', 15, 'bold'),state='disabled')
         self.button3 = tk.Button(root, text='     Start Classifying     ', command=self.start_class, font=('Arial', 15, 'bold'),state='disabled')
         self.button4 = tk.Button(root, text='      Exit Application      ', command=self.make_quit_dialog, font=('Arial', 15, 'bold'))
 
-        canvas1.create_window(75,50,window=self.relbutt)
-        canvas1.create_window(250, 50, window=self.button0)
-        canvas1.create_window(425, 50, window=self.button1)
+        canvas1.create_window(-50,50,window=self.relbutt)
+        canvas1.create_window(230, 50, window=self.button0)
+        canvas1.create_window(415, 50, window=self.button1)
         canvas1.create_window(600, 50, window=self.button2)
-        canvas1.create_window(775, 50, window=self.button3)
-        canvas1.create_window(950, 50, window=self.button4)
+        canvas1.create_window(785, 50, window=self.button3)
+        canvas1.create_window(970, 50, window=self.button4)
 
         self.cubelab = tk.Label(root,text=f'   CUBE NAME: None   ')
         self.cubelab.config(font=('Comic Sans',15,'bold'))
@@ -76,24 +76,37 @@ class MAGPI_LAE_Scanner(tk.Frame):
         self.backbutt = tk.Button(root,text='      Back      ',command=self.last_LAE,font=('Arial',15,'bold'),state='disabled')
         self.savebutt = tk.Button(root,text='      Save      ',command=self.save_output,font=('Arial',15,'bold'),state='disabled')
 
+
+        def set_vmax_nb(value):
+            self.nbvmax=float(value)
+            self.update_plot()
+
+        self.nbvmax=None
+        self.scalevmax = tk.Scale(root, from_=0, to=100, orient=tk.HORIZONTAL,  command=set_vmax_nb, label='Scale NB')
+        # self.scalevmax
+        # self.scalevminbutt = tk.Button(root,text='      vmin      ', command=self.scale_vmin,font=('Arial',15,'bold'),state='disabled')
+
+
         LAElab = tk.Label(root,text='Is it a galaxy?')
         LAElab.config(font=('Comic Sans',15,'bold'))
         self.LAEdec = tk.StringVar(root)
         self.LAEdec.set('  No  ')
-        LAEsel = tk.OptionMenu(root,self.LAEdec,' Yes  ','  No  ','Unsure')
+        LAEsel = tk.OptionMenu(root,self.LAEdec,' Yes  ','  No  ','Maybe')
 
         self.commbutt = tk.Button(root,text=' Comment? ',command=self.add_comment,font=('Arial',15,'bold'),state='disabled')
         self.comm = 'none'
         self.fspcbutt = tk.Button(root,text=' Full Spectrum ',command=self.full_spectrum,font=('Arial',15,'bold'),state='disabled')
 
-        canvas1.create_window(350,170,window=LAElab)
-        canvas1.create_window(450,170,window=LAEsel)
-        canvas1.create_window(540,170,window=self.commbutt)
-        canvas1.create_window(650,170,window=self.fspcbutt)
+        canvas1.create_window(300,170,window=LAElab)
+        canvas1.create_window(425,170,window=LAEsel)
+        canvas1.create_window(555,170,window=self.commbutt)
+        canvas1.create_window(710,170,window=self.fspcbutt)
         
-        canvas1.create_window(400,200,window=self.nextbutt)
-        canvas1.create_window(500,200,window=self.backbutt)
-        canvas1.create_window(600,200,window=self.savebutt)
+        canvas1.create_window(350,200,window=self.nextbutt)
+        canvas1.create_window(505,200,window=self.backbutt)
+        canvas1.create_window(660,200,window=self.savebutt)
+
+        canvas1.create_window(900,190,window=self.scalevmax)
 
         bdcheck = np.random.randint(0,51,1)
         if bdcheck == 1:
@@ -223,7 +236,7 @@ class MAGPI_LAE_Scanner(tk.Frame):
         
         self.plot.get_tk_widget().pack_forget()
         plt.close('all')
-        self.fig = self.data_cube.Single_Plot(self.current_coords,idt,IDt)
+        self.fig, self.nbvmax = self.data_cube.Single_Plot(self.current_coords,idt,IDt, nbvmax=self.nbvmax)
         self.plot = FigureCanvasTkAgg(self.fig, root) 
         self.plot.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
     
@@ -267,10 +280,11 @@ class MAGPI_LAE_Scanner(tk.Frame):
         self.combox.destroy()
         
     def next_LAE(self):
-        sel_dic = {' Yes  ':1,'  No  ':2,'Unsure':3}
+        sel_dic = {' Yes  ':1,'  No  ':2,'Maybe':3}
         tind = self.dorder[self.index]
         self.output[str(tind)] = {'Class':sel_dic[self.LAEdec.get()],'Comm':self.comm}
         self.comm = 'none'
+        self.nbvmax=None
         self.cmlab.config(text=' '*250)
         self.index+=1
         self.get_next_good()
@@ -278,13 +292,14 @@ class MAGPI_LAE_Scanner(tk.Frame):
 
     def last_LAE(self):
         self.index -= 1
+        self.nbvmax=None
         self.good_indices = self.good_indices[:-1]
         self.get_next_good()
         self.update_plot()
 
     def save_output(self,auto=False):
         if self.done:
-            sel_dic = {' Yes  ':1,'  No  ':2,'Unsure':3}
+            sel_dic = {' Yes  ':1,'  No  ':2,'Maybe':3}
             tind = self.dorder[self.index-1]
             self.output[str(tind)] = {'Class':sel_dic[self.LAEdec.get()],'Comm':self.comm}
         
