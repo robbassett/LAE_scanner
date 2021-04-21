@@ -52,6 +52,7 @@ segnum = 5000
 for t in good:
     row = class_data[t]
     coords = [int(row[3]),int(row[2]),int(row[4])]
+
     mini_cube = cube[
         coords[2]-nbs:coords[2]+nbs,
         coords[0]-whs:coords[0]+whs,
@@ -65,13 +66,13 @@ for t in good:
     ]
 
     nb_im = np.nansum(mini_cube,axis=0)-(np.nansum(cont_cube,axis=0)*(6./20.))
-    nb_im = filt(nb_im,sigma=1.)
-    tseg = make_segment(nb_im,6.5,segnum)
+    nb_im = filt(nb_im,sigma=2)
+    tseg = make_segment(nb_im,3,segnum)
     segnum+=1
     segout[
         coords[0]-whs:coords[0]+whs,
         coords[1]-whs:coords[1]+whs,
-    ] = tseg
+    ] += tseg
     
 smm = pf.PrimaryHDU(segout)
 smm.writeto(args.output,overwrite=True)
