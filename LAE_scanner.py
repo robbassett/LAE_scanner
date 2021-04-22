@@ -3,6 +3,10 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import astropy.io.fits as pf
 import bottleneck as bn
+import copy
+
+CMAP = copy.copy(cm.get_cmap('inferno'))
+CMAP.set_bad(color='w')
 
 def plot_step_spectrum(wav,spec,ax):
     nwav = np.zeros(len(wav)*2+2)
@@ -47,25 +51,6 @@ class MAGPI_LAE_Check(object):
 
         self.xv,self.yv = np.meshgrid(x,y)
 
-    def Check_Edge(self,coords,box_size=20):
-
-        """
-        checks = [[coords[0]-box_size,coords[1]],
-                  [coords[0]+box_size,coords[1]],
-                  [coords[0],coords[1]-box_size],
-                  [coords[0],coords[1]+box_size]]
-
-        self.good=True
-        for ch in checks:
-            tms = self.data[:,int(ch[1]),int(ch[0])]
-            tch = np.where(np.isfinite(tms))[0]
-
-            if len(tch) == 0:
-                self.good=False
-                break
-        """
-        self.good=True
-
     def Single_Plot(self,coords,idt,IDt,box_size=20,spec_size=70, nbvmax=None):
 
         self.current_coords = coords
@@ -74,8 +59,24 @@ class MAGPI_LAE_Check(object):
         tr,tc = np.where(self.current_rad <= self.sum_rad)
         tz    = np.where(np.abs(self.wav_ind-coords[2]) <= spec_size)[0]
 
+        yshf = 0
         imr = np.linspace(int(coords[0]-box_size),int(coords[0]+box_size),int((2.*box_size)+1.),dtype=int)
+        if imr[0] < 0:
+            yshf = imr.min()
+            imr = np.arange(0,2*box_size+1,1,dtype=int)
+        if imr[-1] > self.data.shape[2]-1:
+            yshf = imr.max()-self.data.shape[2]
+            imr = np.arange(self.data.shape[2]-2*box_size-1,self.data.shape[2],1,dtype=int)
+
+        xshf = 0
         imc = np.linspace(int(coords[1]-box_size),int(coords[1]+box_size),int((2.*box_size)+1.),dtype=int)
+        if imc[0] < 0:
+            xshf = imc.min()
+            imc = np.arange(0,2*box_size+1,1,dtype=int)
+        if imc[-1] > self.data.shape[1]-1:
+            xshf = imc.max()-self.data.shape[1]
+            imc = np.arange(self.data.shape[1]-2*box_size-1,self.data.shape[1],1,dtype=int)
+            
         imz = np.where(np.abs(self.wav_ind-coords[2]) <= 3.)[0]
         subz= np.where((coords[2]-self.wav_ind-4. < 30)|(self.wav_ind-4-coords[2] < 30))[0]
         subtot= self.data[subz,:,:]
@@ -88,6 +89,9 @@ class MAGPI_LAE_Check(object):
         self.current_img  = self.current_img[:,imc,:]
         self.current_img  = self.current_img[:,:,imr]
         self.current_img  = np.nansum(self.current_img-subv,axis=0)
+
+        br,bc = np.where(self.current_img == 0)
+        self.current_img[br,bc] = np.nan
 
         subtot = bn.nanmean(subtot,axis=0)
         self.tot_img = self.data[imz,:,:]
@@ -120,14 +124,14 @@ class MAGPI_LAE_Check(object):
 
         # Display narrow-band image
         ax = F.add_subplot(122)
-        aperture = plt.Circle((box_size,box_size), self.sum_rad, fc='None',ec='w')
+        aperture = plt.Circle((box_size+yshf,box_size+xshf), self.sum_rad, fc='None',ec='w')
         if nbvmax!=None:
             vmax = np.nanmin(self.current_img) +  ((np.nanmax(self.current_img)-np.nanmin(self.current_img)) * (nbvmax/100) )
             if vmax <=-8: 
                 vmax=None
-            ax.imshow(self.current_img,origin='lower',vmin=-8, vmax=vmax, cmap=cm.inferno)
+            ax.imshow(self.current_img,origin='lower',vmin=-8, vmax=vmax, cmap=CMAP)
         else:
-            ax.imshow(self.current_img,origin='lower',vmin=-8,cmap=cm.inferno)
+            ax.imshow(self.current_img,origin='lower',vmin=-8,cmap=CMAP)
 
         ax.add_patch(aperture)
         ax.set_xticks([])
