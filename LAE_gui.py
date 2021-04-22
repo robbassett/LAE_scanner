@@ -201,15 +201,9 @@ class MAGPI_LAE_Scanner(tk.Frame):
                         self.cube_num = minz
                         self.data_cube = LAEs.MAGPI_LAE_Check(f'./tmp_cubes/cube_{self.cube_num}.fits')
                         
-
-                    ncrds = [crds[0],crds[1],crds[2]-self.zstrt[self.cube_num]]
-                    self.data_cube.Check_Edge(ncrds)
-            
-                    if self.data_cube.good:
-                        fl=1
-                    else:
-                        self.index+=1
-
+                    ncrds = [crds[0],crds[1],crds[2]-self.zstrt[self.cube_num]]  
+                    fl = 1
+                    
             else:
                 zfg = make_zanac()
                 self.plot.get_tk_widget().pack_forget()
@@ -224,10 +218,11 @@ class MAGPI_LAE_Scanner(tk.Frame):
 
         if fl == 2:
             root.quit()
-        self.good_indices.append(tind)
-        self.current_coords = ncrds
-        self.class_count += 1
-        if self.class_count%self.auto_save_n == 0: self.save_output(auto=True)
+        else:
+            self.good_indices.append(tind)
+            self.current_coords = ncrds
+            self.class_count += 1
+            if self.class_count%self.auto_save_n == 0: self.save_output(auto=True)
         
     def update_plot(self):
         tind = self.dorder[self.index]
@@ -288,7 +283,10 @@ class MAGPI_LAE_Scanner(tk.Frame):
         self.cmlab.config(text=' '*250)
         self.index+=1
         self.get_next_good()
-        self.update_plot()
+        try:
+            self.update_plot()
+        except:
+            pass
 
     def last_LAE(self):
         self.index -= 1
