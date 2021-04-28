@@ -27,6 +27,16 @@ astropy
 
 bottleneck
 
+# Getting Started
+
+If this is your first time using LAE_scanner, you can find some information on using the software below. There is also a video to help you get started available at:
+
+https://www.dropbox.com/s/wat6c0jqwqkl1yt/LAE_scanner_demo_video.mov?dl=0
+
+To give you an idea of what types of sources you might expect before you jump into your assigned fields, we have put together a getting started guide. This is included in this repo as getting_started.pdf. Once you've read over this guide, there is also a short training set for the cube GAMAJ140913, the catalogue file is also in the repo: training\_set\_GAMAJ140913.cat. This set includes 38 objects, most of which are fairly clear examples of either real or spurious sources. Once you have classified these objects you can check your answers against our expert classifiers by running the script training\_summary.py as:
+
+python training\_summary.py -i your_classifications.dat
+
 # Usage
 To use LAE_scanner, navigate into the LAE_scanner folder and type this into your terminal:
 pythion LAE_gui.py
