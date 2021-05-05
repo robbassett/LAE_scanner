@@ -20,7 +20,6 @@ def make_one_plot(line,answers,i):
     cl = CLDIC[line[-1]]
     ind = np.where(answers.T[0] == line[0])[0][0]
     ans = answers[ind]
-    print(ind,line[0],ans)
     
     aa = f'{CLDIC[ans[1]]} {CLDIC[ans[2]]} {CLDIC[ans[3]]}'
     
