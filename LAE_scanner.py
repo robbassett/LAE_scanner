@@ -37,7 +37,8 @@ class MAGPI_LAE_Check(object):
         self.data  = dc[data_ind].data
         self.noise = dc[data_ind+1].data
         self.head  = dc[data_ind].header
-
+        dc.close()
+        
         mnoi = bn.nanmean(self.noise,axis=1)
         self.mean_noise = bn.nanmean(mnoi,axis=1)
 
@@ -51,7 +52,7 @@ class MAGPI_LAE_Check(object):
 
         self.xv,self.yv = np.meshgrid(x,y)
 
-    def Single_Plot(self,coords,idt,IDt,box_size=20,spec_size=70, nbvmax=None):
+    def Single_Plot(self,coords,idt,IDt,box_size=20,spec_size=70, nbvmax=100):
 
         self.current_coords = coords
         self.current_rad    = np.sqrt((self.xv-coords[0])**2.+(self.yv-coords[1])**2.)
@@ -99,7 +100,7 @@ class MAGPI_LAE_Check(object):
 
         tzc = np.where(np.abs(self.wav_ind-coords[2]) <= 6.)[0]
         
-        F  = plt.figure(figsize=(14,5))
+        F  = plt.figure(num=1,figsize=(14,5),clear=True)
 
         # Display spectrum
         ax = F.add_subplot(121)
@@ -125,6 +126,10 @@ class MAGPI_LAE_Check(object):
         # Display narrow-band image
         ax = F.add_subplot(122)
         aperture = plt.Circle((box_size+yshf,box_size+xshf), self.sum_rad, fc='None',ec='w')
+        
+        vmax = np.nanmax(self.current_img)*(nbvmax/100)
+        vmin = np.nanmin(self.current_img)
+        """
         if nbvmax!=None:
             vmax = np.nanmin(self.current_img) +  ((np.nanmax(self.current_img)-np.nanmin(self.current_img)) * (nbvmax/100) )
             if vmax <=-8: 
@@ -132,6 +137,8 @@ class MAGPI_LAE_Check(object):
             ax.imshow(self.current_img,origin='lower',vmin=-8, vmax=vmax, cmap=CMAP)
         else:
             ax.imshow(self.current_img,origin='lower',vmin=-8,cmap=CMAP)
+        """
+        ax.imshow(self.current_img,origin='lower',vmin=vmin,vmax=vmax,cmap=CMAP)
 
         ax.add_patch(aperture)
         ax.set_xticks([])

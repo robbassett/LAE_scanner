@@ -32,8 +32,10 @@ def MiniCubes(catalog,cube_name,ncubes=20,_buffer=50):
         thed['CD3_3']  = hed['CD3_3']
         tmc  = pf.HDUList([hdu1,hdu2])
         tmc.writeto(f'./tmp_cubes/cube_{i}.fits',overwrite=True)
+        tmc.close()
 
         centz[i] = (czs[1]+czs[0])/2.
         strtz[i] = czs[0]
+    cube.close()
 
     return centz,strtz

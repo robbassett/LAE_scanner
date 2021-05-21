@@ -81,9 +81,9 @@ class MAGPI_LAE_Scanner(tk.Frame):
             self.nbvmax=float(value)
             self.update_plot()
 
-        self.nbvmax=None
-        self.scalevmax = tk.Scale(root, from_=0, to=100, orient=tk.HORIZONTAL,  command=set_vmax_nb, label='Scale NB')
-        # self.scalevmax
+        self.nbvmax=100
+        self.scalevmax = tk.Scale(root, from_=0.1, to=100, orient=tk.HORIZONTAL,  command=set_vmax_nb, label='Scale NB max')
+        self.scalevmax.set(100)
         # self.scalevminbutt = tk.Button(root,text='      vmin      ', command=self.scale_vmin,font=('Arial',15,'bold'),state='disabled')
 
 
@@ -279,7 +279,8 @@ class MAGPI_LAE_Scanner(tk.Frame):
         tind = self.dorder[self.index]
         self.output[str(tind)] = {'Class':sel_dic[self.LAEdec.get()],'Comm':self.comm}
         self.comm = 'none'
-        self.nbvmax=None
+        self.nbvmax=100
+        self.scalevmax.set(100)
         self.cmlab.config(text=' '*250)
         self.index+=1
         self.get_next_good()
@@ -290,7 +291,8 @@ class MAGPI_LAE_Scanner(tk.Frame):
 
     def last_LAE(self):
         self.index -= 1
-        self.nbvmax=None
+        self.nbvmax=100
+        self.scalevmax.set(100)
         self.good_indices = self.good_indices[:-1]
         self.get_next_good()
         self.update_plot()
